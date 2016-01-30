@@ -13,16 +13,19 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
+import javax.net.ssl.HttpsURLConnection;
+
 
 /**
  * Created by nbdav on 2016/1/24.
  */
 public class HttpThread extends Thread {
-    private static String APIURL="http://apis.baidu.com/heweather/weather/free";
-    private static String APIKEY="b6dbd12c5e1dc6aa8edede7edecde246";
+    private static final String APIURL="https://api.heweather.com/x3/weather";    //天气api url
+    private static final String KEY="259b556b9f504e1db746e19fe813ff22";        //apikey
+
 
     private String city;
-    private HttpURLConnection httpURLConnection;
+    private HttpsURLConnection httpsURLConnection;
     private URL url;
     private Handler handler;
     private String result;
@@ -38,27 +41,28 @@ public class HttpThread extends Thread {
     public void run() {
         super.run();
 
-        String requestURL=APIURL+"?city="+city;
+
+        String requestURL=APIURL+"?city="+city+"&key="+KEY;
 
         try {
             url=new URL(requestURL);
-            httpURLConnection= (HttpURLConnection) url.openConnection();
-            httpURLConnection.setConnectTimeout(8000);
-            httpURLConnection.setRequestMethod("GET");
-            httpURLConnection.setRequestProperty("apikey", APIKEY);
+            httpsURLConnection= (HttpsURLConnection) url.openConnection();
+            httpsURLConnection.setConnectTimeout(8000);
+            httpsURLConnection.setRequestMethod("GET");
+            //httpsURLConnection.setRequestProperty("key", APIKEY);
 
 
             //获得读取的内容
             InputStreamReader in;
             InputStream inputStream;
-            inputStream = httpURLConnection.getInputStream();
+            inputStream = httpsURLConnection.getInputStream();
             in = new InputStreamReader(inputStream);
             BufferedReader buffer = new BufferedReader(in);
             String inputLine = null;
             while ((inputLine = buffer.readLine()) != null) {
                 result += inputLine + "\n";
             }
-            httpURLConnection.disconnect();
+            httpsURLConnection.disconnect();
 
             //刷新控件内容
             handler.post(new Runnable() {
@@ -66,19 +70,30 @@ public class HttpThread extends Thread {
                 public void run() {
 
                     Weather weather=new Weather();
-                    String jsonString="{\"HeWeather data service 3.0\":\"asdf\"}";
+
                     Gson gson=new Gson();
                     weather=gson.fromJson(result,Weather.class);
-                    String condition_d=weather.serviceVersion[0].daily_forecast[0].cond.txt_d;
-                    String condition_n=weather.serviceVersion[0].daily_forecast[0].cond.txt_n;
-                    int tmp_min=weather.serviceVersion[0].daily_forecast[0].tmp.min;
-                    int tmp_max=weather.serviceVersion[0].daily_forecast[0].tmp.max;
-                    String air_quality=weather.serviceVersion[0].aqi.city.qlty;
-                    String weatherDesc="白天天气："+condition_d+"\n"
-                            +"夜晚天气："+condition_n+"\n"
-                            +"气温："+tmp_min+" ~ "+tmp_max+"\n"
-                            +"空气质量："+air_quality;
-                    tvResult.setText(weatherDesc);
+                    if(weather.serviceVersion[0].status.equals("ok")) {
+                        String condition_d = weather.serviceVersion[0].daily_forecast[0].cond.txt_d;
+                        String condition_n = weather.serviceVersion[0].daily_forecast[0].cond.txt_n;
+                        int tmp_min = weather.serviceVersion[0].daily_forecast[0].tmp.min;
+                        int tmp_max = weather.serviceVersion[0].daily_forecast[0].tmp.max;
+                        String air_quality;
+                        if(weather.serviceVersion[0].basic.cnty.equals("中国"))
+                        {
+                            air_quality=weather.serviceVersion[0].aqi.city.qlty;
+                        }else
+                        {
+                            air_quality="no data";
+                        }
+
+                        String weatherDesc = "白天天气：" + condition_d + "\n"
+                                + "夜晚天气：" + condition_n + "\n"
+                                + "气温：" + tmp_min + " ~ " + tmp_max + "\n"
+                                + "空气质量：" + air_quality;
+                        tvResult.setText(weatherDesc);
+                    } else
+                        tvResult.setText(weather.serviceVersion[0].status);
 
                 }
             });

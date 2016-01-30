@@ -14,33 +14,23 @@ import com.google.gson.Gson;
 
 
 public class MainActivity extends AppCompatActivity {
+    //定义控件
     private ImageButton ibSetting;
     private TextView tvCity;
     private TextView tvResult;
 
-    private String city;
+    private String city;    //选定的城市名称
     private Handler handler=new Handler();
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==1&&resultCode==1)
-        {
-            city=data.getStringExtra("city");
-            tvCity.setText(city);
-            HttpThread httpThread=new HttpThread(city,tvResult,handler);
-            httpThread.start();
-        }
-    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ibSetting=(ImageButton)findViewById(R.id.ibSetting);
-        tvCity= (TextView) findViewById(R.id.tvCity);
-        tvResult= (TextView) findViewById(R.id.tvResult);
+        init();
+
 
 
         //点击设置按钮跳转
@@ -54,12 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        //读取城市名称
-        SharedPreferences sp=MainActivity.this.getSharedPreferences("Preference",MODE_PRIVATE);
-        city=sp.getString("city","");
-        if(city=="")
-            return;
-        tvCity.setText(city);
+
 
 
         //开启线程获取天气数据
@@ -75,5 +60,34 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /*
+    * 处理设置页面返回信息
+    * */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==1&&resultCode==1)
+        {
+            city=data.getStringExtra("city");
+            tvCity.setText(city);
+            HttpThread httpThread=new HttpThread(city,tvResult,handler);
+            httpThread.start();
+        }
+    }
+    /*
+    * 初始化程序
+    * */
+    private void init(){
+        //设置控件
+        ibSetting=(ImageButton)findViewById(R.id.ibSetting);
+        tvCity= (TextView) findViewById(R.id.tvCity);
+        tvResult= (TextView) findViewById(R.id.tvResult);
 
+        //查看本地是否存储城市名称，如有则直接载入
+        SharedPreferences sp=MainActivity.this.getSharedPreferences("Preference",MODE_PRIVATE);
+        city=sp.getString("city","");
+        if(city=="")
+            tvCity.setText("City not set.");
+        tvCity.setText(city);
+    }
 }
