@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -43,6 +44,7 @@ public class HttpThread extends Thread {
 
 
         String requestURL=APIURL+"?city="+city+"&key="+KEY;
+
 
         try {
             url=new URL(requestURL);
@@ -98,8 +100,10 @@ public class HttpThread extends Thread {
                 }
             });
         } catch (MalformedURLException e) {
+            Log.e("error","url");
             e.printStackTrace();
         } catch (IOException e) {
+            Log.e("error","下载天气信息");
             e.printStackTrace();
         }
     }

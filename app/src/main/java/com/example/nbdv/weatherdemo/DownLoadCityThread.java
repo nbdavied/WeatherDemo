@@ -38,8 +38,8 @@ public class DownLoadCityThread extends Thread {
         result="";
         URL url= null;
         HttpsURLConnection httpsURLConnection;
-        //try {
-            /*url = new URL(requestURL);
+        try {
+            url = new URL(requestURL);
             httpsURLConnection= (HttpsURLConnection) url.openConnection();
             httpsURLConnection.setConnectTimeout(30000);
             httpsURLConnection.setRequestMethod("GET");
@@ -54,18 +54,16 @@ public class DownLoadCityThread extends Thread {
             while ((inputLine = buffer.readLine()) != null) {
                 result += inputLine + "\n";
             }
-            httpsURLConnection.disconnect();*/
+            httpsURLConnection.disconnect();
 
             //解析json
-
-
-            result="{\"city_info\":[{\"city\":\"ABCD\",\"cnty\":\"中国\",\"id\":\"CN101310230\",\"lat\":\"11.26\",\"lon\":\"114.20\",\"prov\":\"海南\"},{\"city\":\"北京\",\"cnty\":\"中国\",\"id\":\"CN101010100\",\"lat\":\"39.904000\",\"lon\":\"116.391000\",\"prov\":\"直辖市\"},{\"city\":\"海淀\",\"cnty\":\"中国\",\"id\":\"CN101010200\",\"lat\":\"39.590000\",\"lon\":\"116.170000\",\"prov\":\"直辖市\"}],\"status\":\"ok\"}";
+            //result="{\"city_info\":[{\"city\":\"ABCD\",\"cnty\":\"中国\",\"id\":\"CN101310230\",\"lat\":\"11.26\",\"lon\":\"114.20\",\"prov\":\"海南\"},{\"city\":\"北京\",\"cnty\":\"中国\",\"id\":\"CN101010100\",\"lat\":\"39.904000\",\"lon\":\"116.391000\",\"prov\":\"直辖市\"},{\"city\":\"海淀\",\"cnty\":\"中国\",\"id\":\"CN101010200\",\"lat\":\"39.590000\",\"lon\":\"116.170000\",\"prov\":\"直辖市\"}],\"status\":\"ok\"}";
             Cities cities;
             Gson gson=new Gson();
             cities=gson.fromJson(result,Cities.class);
             if(cities.status.equals("ok")){
                 //当数据正常下载，则导入数据库
-                Log.i("info", cities.city_info[0].city);
+                Log.i("status", "download success");
                 SQLiteDatabase db=context.openOrCreateDatabase("weather.db",Context.MODE_PRIVATE,null);
 
                 //创建新表
@@ -85,18 +83,18 @@ public class DownLoadCityThread extends Thread {
             }else
             {
                 //未正常下载数据
-                Log.i("info",cities.status);
+                Log.i("status",cities.status);
 
             }
 
-        /*} catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (ProtocolException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
             Log.e("error","internet wrong");
-        }*/
+        }
 
     }
 }
