@@ -20,7 +20,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvResult;
 
     private String city;    //选定的城市名称
+    private String id;      //城市id
     private Handler handler=new Handler();
+
 
 
 
@@ -29,9 +31,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //初始化界面
         init();
-
-
 
         //点击设置按钮跳转
         ibSetting.setOnClickListener(new OnClickListener() {
@@ -41,23 +42,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, 1);
             }
         });
-
-
-
-
-
-
-        //开启线程获取天气数据
-        HttpThread httpThread=new HttpThread(city,tvResult,handler);
-        httpThread.start();
-
-/*        Weather weather=new Weather();
-        String jsonString="{\"HeWeather data service 3.0\":\"asdf\"}";
-        Gson gson=new Gson();
-        weather=gson.fromJson(jsonString,Weather.class);
-        tvResult.setText(weather.getServiceVersion());*/
-
-
     }
 
     /*
@@ -70,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         {
             city=data.getStringExtra("city");
             tvCity.setText(city);
-            HttpThread httpThread=new HttpThread(city,tvResult,handler);
+            HttpThread httpThread=new HttpThread(city,tvResult,handler,HttpThread.SEARCH_BY_CITY);
             httpThread.start();
         }
     }
@@ -83,11 +67,33 @@ public class MainActivity extends AppCompatActivity {
         tvCity= (TextView) findViewById(R.id.tvCity);
         tvResult= (TextView) findViewById(R.id.tvResult);
 
-        //查看本地是否存储城市名称，如有则直接载入
+        //查看本地是否存储城市名称或id，如有则直接载入
         SharedPreferences sp=MainActivity.this.getSharedPreferences("Preference",MODE_PRIVATE);
         city=sp.getString("city","");
-        if(city=="")
+        id=sp.getString("id","");
+        if(id==""&&city=="")
+        {
+            //id和市名都未设置，则直接转向设置界面
             tvCity.setText("City not set.");
-        tvCity.setText(city);
+            Intent intent = new Intent(MainActivity.this, SettingActivity.class);
+            startActivityForResult(intent, 1);
+        }
+        else if(id=="")
+        {
+            //id未设置，则根据市名查询天气
+            tvCity.setText(city);
+            //开启线程获取天气数据
+            HttpThread httpThread=new HttpThread(city,tvResult,handler,HttpThread.SEARCH_BY_CITY);
+            httpThread.start();
+
+        }
+        else
+        {
+            //已存储id和city
+            tvCity.setText(city);
+            HttpThread httpThread=new HttpThread(city,tvResult,handler,HttpThread.SEARCH_BY_ID);
+            httpThread.start();
+        }
+
     }
 }

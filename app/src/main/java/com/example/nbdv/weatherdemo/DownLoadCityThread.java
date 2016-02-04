@@ -3,6 +3,7 @@ package com.example.nbdv.weatherdemo;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Handler;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -25,8 +26,10 @@ public class DownLoadCityThread extends Thread {
     private static final String APIURL="https://api.heweather.com/x3/citylist";
     private static final String KEY="259b556b9f504e1db746e19fe813ff22";
     private  Context context;
-    public DownLoadCityThread(Context context) {
+    private Handler handler;
+    public DownLoadCityThread(Context context,Handler handler) {
         this.context=context;
+        this.handler=handler;
     }
 
     private  String result;
@@ -71,15 +74,12 @@ public class DownLoadCityThread extends Thread {
                 db.execSQL("CREATE TABLE city(city VARCHAR,cnty VARCHAR,id VARCHAR PRIMARY KEY,lat VARCHAR,lon VARCHAR,prov VARCHAR)");
                 for (CityInfo cityInfo:cities.city_info
                      ) {
-                    //执行插入语句
+                    //执行插入语句,将城市数据插入数据库
                     db.execSQL("insert into city values(?,?,?,?,?,?)",new Object[]{cityInfo.city,cityInfo.cnty,cityInfo.id,cityInfo.lat,cityInfo.lon,cityInfo.prov});
                 }
                 db.close();
-                //将数据库置为已下载状态
-                SharedPreferences sp=context.getSharedPreferences("Preference",Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sp.edit();
-                editor.putBoolean("download", true);
-                editor.commit();
+
+                handler.sendEmptyMessage(0);
             }else
             {
                 //未正常下载数据

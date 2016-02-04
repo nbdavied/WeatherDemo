@@ -24,27 +24,48 @@ public class HttpThread extends Thread {
     private static final String APIURL="https://api.heweather.com/x3/weather";    //天气api url
     private static final String KEY="259b556b9f504e1db746e19fe813ff22";        //apikey
 
+    public static final int SEARCH_BY_ID=1;
+    public static final int SEARCH_BY_CITY=2;
 
-    private String city;
+    private int mode;                                   //查找模式
+    private String city;                                //设置的城市
+    private String id;
     private HttpsURLConnection httpsURLConnection;
     private URL url;
     private Handler handler;
     private String result;
     private TextView tvResult;
-    public HttpThread(String city,TextView tvResult,Handler handler){
-        this.city=city;
+    /*
+    * 当mode=1，根据id查询
+    * 当mode=2，根据city name
+    * */
+    public HttpThread(String searchString,TextView tvResult,Handler handler,int mode){
+        if(mode==SEARCH_BY_ID)
+            this.id=searchString;
+        else if(mode==SEARCH_BY_CITY)
+            this.city=searchString;
         this.tvResult=tvResult;
         this.handler=handler;
+        this.mode=mode;
         result="";
     }
 
     @Override
     public void run() {
         super.run();
-
-
-        String requestURL=APIURL+"?city="+city+"&key="+KEY;
-
+        String requestURL;
+        if(mode==SEARCH_BY_ID){
+            //根据id设置url
+            requestURL=APIURL+"?cityid="+id+"&key="+KEY;
+        }
+        else if(mode==SEARCH_BY_CITY){
+            //根据城市名称设置url
+            requestURL=APIURL+"?city="+city+"&key="+KEY;
+        }
+        else{
+            requestURL="";
+            Log.e("error","url错误");
+        }
 
         try {
             url=new URL(requestURL);
@@ -81,7 +102,7 @@ public class HttpThread extends Thread {
                         int tmp_min = weather.serviceVersion[0].daily_forecast[0].tmp.min;
                         int tmp_max = weather.serviceVersion[0].daily_forecast[0].tmp.max;
                         String air_quality;
-                        if(weather.serviceVersion[0].basic.cnty.equals("中国"))
+                        if(weather.serviceVersion[0].aqi!=null)
                         {
                             air_quality=weather.serviceVersion[0].aqi.city.qlty;
                         }else
