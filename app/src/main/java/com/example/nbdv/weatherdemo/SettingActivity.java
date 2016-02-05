@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
+import android.widget.TextView;
 
 import com.example.nbdv.weatherdemo.model.City;
 import com.example.nbdv.weatherdemo.model.Province;
@@ -30,12 +31,15 @@ import static android.widget.AdapterView.*;
 
 public class SettingActivity extends AppCompatActivity {
     private EditText etCity;
+    private TextView progressHint;
     private Button btConfirm;
     private Spinner spProvince;
     private Spinner spCity;
     private Context context;
-    private String city;
+    private String cityName;
     private String id;
+    private String savedCityName;
+    private String savedCityId;
     private List<Province> provinceList;
     private List<City> cityList;
     private List<String> provinceNameList;
@@ -43,7 +47,8 @@ public class SettingActivity extends AppCompatActivity {
     private ArrayAdapter provinceAdapter;
     private ArrayAdapter cityAdapter;
     private WeatherDB weatherDB;
-
+    private City chosenCity;
+    private boolean needSelectCity=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,32 +56,8 @@ public class SettingActivity extends AppCompatActivity {
 
         init();
 
-        //提交按钮监听
-        btConfirm.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                city=etCity.getText().toString();
-                if(city=="")
-                {
-                    finish();
-                    return;
-                }
 
 
-                //输入的城市名称保存到本地
-                SharedPreferences sp=context.getSharedPreferences("Preference",MODE_PRIVATE);
-                SharedPreferences.Editor editor=sp.edit();
-                editor.putString("city",city);
-                editor.commit();
-
-                //将输入的城市名称回传给mainactivity
-                Intent data=new Intent();
-                data.putExtra("city",city);
-                setResult(1,data);
-
-                finish();
-            }
-        });
     }
 
     private void init(){
@@ -85,6 +66,7 @@ public class SettingActivity extends AppCompatActivity {
         btConfirm= (Button) findViewById(R.id.btConfirm);
         spProvince= (Spinner) findViewById(R.id.spProvince);
         spCity= (Spinner) findViewById(R.id.spCity);
+        progressHint= (TextView) findViewById(R.id.progressHint);
         id="";
         weatherDB=new WeatherDB(context,handler);
         provinceNameList=new ArrayList<String>();
@@ -102,8 +84,8 @@ public class SettingActivity extends AppCompatActivity {
         **/
 
         SharedPreferences sp=context.getSharedPreferences("Preference", MODE_PRIVATE);
-        city=sp.getString("city","");
-        id=sp.getString("id","");
+        savedCityName=sp.getString("city","");
+        savedCityId=sp.getString("id","");
         boolean isDownloaded=sp.getBoolean("download",false);
 
 
@@ -119,10 +101,53 @@ public class SettingActivity extends AppCompatActivity {
 
         }
         spProvince.setOnItemSelectedListener(provinceSelectedListener);
+        spCity.setOnItemSelectedListener(citySelectedListener);
+
+        btConfirm.setOnClickListener(confirmButtonListener);
     }
+
+    //提交按钮监听
+    private OnClickListener confirmButtonListener =new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            cityName=etCity.getText().toString();
+            if(etCity.getText().toString().equals(chosenCity.getCityName()))
+            {
+                //输入的城市名称、id保存到本地
+                SharedPreferences sp=context.getSharedPreferences("Preference",MODE_PRIVATE);
+                SharedPreferences.Editor editor=sp.edit();
+                editor.putString("id",chosenCity.getCityId());
+                editor.putString("city",chosenCity.getCityName());
+                editor.commit();
+                //将输入的城市名称回传给mainactivity
+                Intent data=new Intent();
+                data.putExtra("id", chosenCity.getCityId());
+                data.putExtra("city",chosenCity.getCityName());
+                setResult(1, data);//1---根据id查询
+
+
+            }else
+            {
+                //输入的城市名称保存到本地
+                SharedPreferences sp=context.getSharedPreferences("Preference",MODE_PRIVATE);
+                SharedPreferences.Editor editor=sp.edit();
+                editor.remove("id");
+                editor.putString("city",cityName);
+                editor.commit();
+                Intent data=new Intent();
+                data.putExtra("city", cityName);
+                setResult(2, data);//2---根据名称查询
+
+
+            }
+
+            finish();
+        }
+    };
     /*
     * 选择省份后，查找城市列表
     * */
+
     private OnItemSelectedListener provinceSelectedListener = new OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -140,6 +165,7 @@ public class SettingActivity extends AppCompatActivity {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             String city=parent.getSelectedItem().toString();
+            chosenCity=cityList.get(parent.getSelectedItemPosition());
             etCity.setText(city);
         }
 
@@ -147,17 +173,31 @@ public class SettingActivity extends AppCompatActivity {
         public void onNothingSelected(AdapterView<?> parent) {
 
         }
+
+
     };
 
     private Handler handler=new Handler(){
         @Override
         public void handleMessage(Message msg) {
-            //将数据库置为已下载状态
-            SharedPreferences sp=context.getSharedPreferences("Preference",Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sp.edit();
-            editor.putBoolean("download", true);
-            editor.commit();
-            updateSpinner();
+            if(msg.what==1)
+            {
+                //开始加载
+                progressHint.setVisibility(VISIBLE);
+            }
+            if(msg.what==2) {
+                //加载完成，将数据库置为已下载状态，并更新界面
+                SharedPreferences sp = context.getSharedPreferences("Preference", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sp.edit();
+                editor.putBoolean("download", true);
+                editor.commit();
+                updateSpinner();
+                progressHint.setVisibility(GONE);
+            }
+            if(msg.what==3){
+                //数据加载失败
+                progressHint.setText(" (＞﹏＜) \n你的网络是不是有问题啊亲");
+            }
         }
 
     };
@@ -166,32 +206,14 @@ public class SettingActivity extends AppCompatActivity {
     * 从数据库读入省份列表，根据选择的省份读取城市列表
     * */
     private void updateSpinner(){
-        SQLiteDatabase db=context.openOrCreateDatabase("weather.db",MODE_PRIVATE,null);
-        Cursor cursor;
-        String chosenProv;
-        String chosenCity;
         showProvinceList();
-        if(id!="")
-        {
-            cursor=db.rawQuery("select prov,city from city where id=?",new String[]{id});
-            cursor.moveToFirst();
-            chosenProv=cursor.getString(0);
-            chosenCity=cursor.getString(1);
-            spProvince.setSelection(getSpinnerItemByValue(spProvince,chosenProv));
-            showCityList(chosenProv);
-            spCity.setSelection(getSpinnerItemByValue(spCity,chosenCity));
+        if(savedCityId!=""){
+            //当已经保存了id，则直接在spinner选中保存的城市
+            spProvince.setSelection(provinceNameList.indexOf(weatherDB.getProvinceNameById(savedCityId)));
+            needSelectCity=true;
+        }else if(savedCityName!=""){
+            //当未保存id，只保存了城市名称，则尝试搜索城市，如果有则在spinner中选择
         }
-        else if(city!="")
-        {
-            cursor=db.rawQuery("select prov,city from city where city=?",new String[]{city});
-            cursor.moveToFirst();
-            chosenProv=cursor.getString(0);
-            chosenCity=cursor.getString(1);
-            spProvince.setSelection(getSpinnerItemByValue(spProvince,chosenProv));
-            showCityList(chosenProv);
-            spCity.setSelection(getSpinnerItemByValue(spCity,chosenCity));
-        }
-        db.close();
     }
     private void showProvinceList()
     {
@@ -211,7 +233,11 @@ public class SettingActivity extends AppCompatActivity {
         }
 
         cityAdapter.notifyDataSetChanged();
-
+        if(needSelectCity)
+        {
+            spCity.setSelection(cityNameList.indexOf(savedCityName));
+            needSelectCity=false;
+        }
     }
     /**
      * 根据值, 设置spinner默认选中:

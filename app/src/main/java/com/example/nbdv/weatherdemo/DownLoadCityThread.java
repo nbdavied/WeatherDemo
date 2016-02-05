@@ -41,6 +41,7 @@ public class DownLoadCityThread extends Thread {
         result="";
         URL url= null;
         HttpsURLConnection httpsURLConnection;
+        handler.sendEmptyMessage(1);
         try {
             url = new URL(requestURL);
             httpsURLConnection= (HttpsURLConnection) url.openConnection();
@@ -79,20 +80,23 @@ public class DownLoadCityThread extends Thread {
                 }
                 db.close();
 
-                handler.sendEmptyMessage(0);
+                handler.sendEmptyMessage(2);
             }else
             {
                 //未正常下载数据
                 Log.i("status",cities.status);
-
+                handler.sendEmptyMessage(3);
             }
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
+            handler.sendEmptyMessage(3);
         } catch (ProtocolException e) {
             e.printStackTrace();
+            handler.sendEmptyMessage(3);
         } catch (IOException e) {
             e.printStackTrace();
+            handler.sendEmptyMessage(3);
             Log.e("error","internet wrong");
         }
 

@@ -5,16 +5,16 @@ package com.example.nbdv.weatherdemo.model;
  */
 public class Province {
     private String name;
-    private String id;
+    //private String id;
 
-    public Province(String name, String id) {
-        this.id = id;
+    public Province(String name) {
+        //this.id = id;
         this.name = name;
     }
 
     public Province() {
         name="";
-        id="";
+        //id="";
     }
 
     public void setProvinceName(String name){
@@ -24,11 +24,11 @@ public class Province {
         return name;
     }
 
-    public void setId(String id) {
+/*    public void setId(String id) {
         this.id = id;
     }
 
     public String getId() {
         return id;
-    }
+    }*/
 }

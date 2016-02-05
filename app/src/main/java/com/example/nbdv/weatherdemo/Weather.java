@@ -108,7 +108,7 @@ class Now
     public  Cond cond;
     public int fl;
     public int hum;
-    public int pcpn;
+    public float pcpn;
     public int pres;
     public int tmp;
     public  int vis;

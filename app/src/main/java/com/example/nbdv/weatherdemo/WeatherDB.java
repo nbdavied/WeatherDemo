@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
+import android.util.Log;
 
 import com.example.nbdv.weatherdemo.model.City;
 import com.example.nbdv.weatherdemo.model.Province;
@@ -38,10 +39,10 @@ public class WeatherDB {
     * */
     public List<Province> getProvinceList(){
         db=context.openOrCreateDatabase("weather.db",Context.MODE_PRIVATE,null);
-        cursor=db.rawQuery("select prov,id from city where prov in (select prov from city group by prov having count(prov)=1)", null);
+        cursor=db.rawQuery("select distinct prov from city", null);
         provinceList=new ArrayList<Province>();
         while (cursor.moveToNext()){
-            provinceList.add(new Province(cursor.getString(0),cursor.getString(1)));
+            provinceList.add(new Province(cursor.getString(0)));
         }
         db.close();
         return provinceList;
@@ -56,5 +57,18 @@ public class WeatherDB {
         }
         db.close();
         return cityList;
+    }
+    public String getProvinceNameById(String id){
+        String provinceName;
+        db=context.openOrCreateDatabase("weather.db",Context.MODE_PRIVATE,null);
+        cityList=new ArrayList<City>();
+        cursor=db.rawQuery("select prov from city where id=?",new String[]{id});
+        if(cursor.getCount()>1){
+            Log.e("error","province count>1 while id is set");
+        }
+        cursor.moveToFirst();
+        provinceName=cursor.getString(0);
+        db.close();
+        return provinceName;
     }
 }

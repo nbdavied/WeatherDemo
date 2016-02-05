@@ -52,6 +52,14 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode==1&&resultCode==1)
         {
+            //根据id查询
+            city=data.getStringExtra("city");
+            tvCity.setText(city);
+            id=data.getStringExtra("id");
+            HttpThread httpThread=new HttpThread(id,tvResult,handler,HttpThread.SEARCH_BY_ID);
+            httpThread.start();
+        }else if(requestCode==1&&resultCode==2){
+            //根据名字查询
             city=data.getStringExtra("city");
             tvCity.setText(city);
             HttpThread httpThread=new HttpThread(city,tvResult,handler,HttpThread.SEARCH_BY_CITY);
@@ -91,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         {
             //已存储id和city
             tvCity.setText(city);
-            HttpThread httpThread=new HttpThread(city,tvResult,handler,HttpThread.SEARCH_BY_ID);
+            HttpThread httpThread=new HttpThread(id,tvResult,handler,HttpThread.SEARCH_BY_ID);
             httpThread.start();
         }
 
