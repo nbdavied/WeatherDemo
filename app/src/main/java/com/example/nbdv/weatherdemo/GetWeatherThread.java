@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -20,7 +22,7 @@ import javax.net.ssl.HttpsURLConnection;
 /**
  * Created by nbdav on 2016/1/24.
  */
-public class HttpThread extends Thread {
+public class GetWeatherThread extends Thread {
     private static final String APIURL="https://api.heweather.com/x3/weather";    //天气api url
     private static final String KEY="259b556b9f504e1db746e19fe813ff22";        //apikey
 
@@ -34,17 +36,16 @@ public class HttpThread extends Thread {
     private URL url;
     private Handler handler;
     private String result;
-    private TextView tvResult;
+
     /*
     * 当mode=1，根据id查询
     * 当mode=2，根据city name
     * */
-    public HttpThread(String searchString,TextView tvResult,Handler handler,int mode){
+    public GetWeatherThread(String searchString,Handler handler,int mode){
         if(mode==SEARCH_BY_ID)
             this.id=searchString;
         else if(mode==SEARCH_BY_CITY)
             this.city=searchString;
-        this.tvResult=tvResult;
         this.handler=handler;
         this.mode=mode;
         result="";
@@ -87,27 +88,33 @@ public class HttpThread extends Thread {
             }
             httpsURLConnection.disconnect();
 
+//            Gson gson=new Gson();
+//            weather=gson.fromJson(result,Weather.class);
             //刷新控件内容
-            handler.post(new Runnable() {
+            //handler.sendEmptyMessage(0);
+            Message msg=new Message();
+            Bundle bundle=new Bundle();
+            bundle.putString("weatherString",result);
+            msg.setData(bundle);
+            handler.sendMessage(msg);
+            /*handler.post(new Runnable() {
                 @Override
                 public void run() {
 
-                    Weather weather=new Weather();
+                    *//*Weather weather = new Weather();
 
-                    Gson gson=new Gson();
-                    weather=gson.fromJson(result,Weather.class);
-                    if(weather.serviceVersion[0].status.equals("ok")) {
+                    Gson gson = new Gson();
+                    weather = gson.fromJson(result, Weather.class);
+                    if (weather.serviceVersion[0].status.equals("ok")) {
                         String condition_d = weather.serviceVersion[0].daily_forecast[0].cond.txt_d;
                         String condition_n = weather.serviceVersion[0].daily_forecast[0].cond.txt_n;
                         int tmp_min = weather.serviceVersion[0].daily_forecast[0].tmp.min;
                         int tmp_max = weather.serviceVersion[0].daily_forecast[0].tmp.max;
                         String air_quality;
-                        if(weather.serviceVersion[0].aqi!=null)
-                        {
-                            air_quality=weather.serviceVersion[0].aqi.city.qlty;
-                        }else
-                        {
-                            air_quality="no data";
+                        if (weather.serviceVersion[0].aqi != null) {
+                            air_quality = weather.serviceVersion[0].aqi.city.qlty;
+                        } else {
+                            air_quality = "no data";
                         }
 
                         String weatherDesc = "白天天气：" + condition_d + "\n"
@@ -116,10 +123,10 @@ public class HttpThread extends Thread {
                                 + "空气质量：" + air_quality;
                         tvResult.setText(weatherDesc);
                     } else
-                        tvResult.setText(weather.serviceVersion[0].status);
+                        tvResult.setText(weather.serviceVersion[0].status);*//*
 
                 }
-            });
+            });*/
         } catch (MalformedURLException e) {
             Log.e("error","url");
             e.printStackTrace();
