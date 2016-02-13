@@ -5,11 +5,13 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -17,10 +19,15 @@ import com.google.gson.Gson;
 
 public class MainActivity extends AppCompatActivity {
     //定义控件
-    private ImageButton ibSetting;
-    private TextView tvCity;
-    private TextView tvResult;
 
+    private FloatingActionButton fabSetting;
+    private TextView tvCity;
+    private TextView tvTemp;
+    private TextView tvTempRange;
+    private TextView tvAirQua;
+    private TextView tvPM25;
+    private ImageView ivCond;
+    private ProgressBar progressBar;
     private String city;    //选定的城市名称
     private String id;      //城市id
     private Weather weather;
@@ -32,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
             weather = gson.fromJson(msg.getData().getString("weatherString"), Weather.class);
             if(weather!=null)
                 updateContent();
+            progressBar.setVisibility(ProgressBar.INVISIBLE);
         }
     };
 
@@ -45,7 +53,8 @@ public class MainActivity extends AppCompatActivity {
         init();
 
         //点击设置按钮跳转
-        ibSetting.setOnClickListener(new OnClickListener() {
+
+        fabSetting.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, SettingActivity.class);
@@ -79,9 +88,15 @@ public class MainActivity extends AppCompatActivity {
     * */
     private void init() {
         //设置控件
-        ibSetting = (ImageButton) findViewById(R.id.ibSetting);
+        fabSetting= (FloatingActionButton) findViewById(R.id.fabSetting);
         tvCity = (TextView) findViewById(R.id.tvCity);
-        tvResult = (TextView) findViewById(R.id.tvResult);
+
+        tvTemp = (TextView) findViewById(R.id.tvTemp);
+        tvTempRange = (TextView) findViewById(R.id.tvTempRange);
+        tvAirQua = (TextView) findViewById(R.id.tvAirQua);
+        tvPM25 = (TextView) findViewById(R.id.tvPM25);
+        ivCond= (ImageView) findViewById(R.id.ivCond);
+        progressBar=(ProgressBar) findViewById(R.id.progressBar);
 
         weather = new Weather();
         //查看本地是否存储城市名称或id，如有则直接载入
@@ -108,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getWeather(String searchString, int searchMode) {
+        progressBar.setVisibility(ProgressBar.VISIBLE);
         GetWeatherThread thread = new GetWeatherThread(searchString, handler, searchMode);
         thread.start();
     }
@@ -119,7 +135,44 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         if (weather.serviceVersion[0].status.equals("ok")) {
-            String condition_d = weather.serviceVersion[0].daily_forecast[0].cond.txt_d;
+            int tmp_min = weather.serviceVersion[0].daily_forecast[0].tmp.min;
+            int tmp_max = weather.serviceVersion[0].daily_forecast[0].tmp.max;
+            int curTmp=weather.serviceVersion[0].now.tmp;
+            String PM25;
+            String air_quality;
+            if (weather.serviceVersion[0].aqi != null) {
+                air_quality = weather.serviceVersion[0].aqi.city.qlty;
+                PM25=String.valueOf(weather.serviceVersion[0].aqi.city.pm25);
+
+            } else {
+                air_quality = "no data";
+                PM25="no data";
+            }
+            tvTemp.setText(curTmp+"℃");
+            tvTempRange.setText("温度："+tmp_min+" ～ "+tmp_max);
+            tvPM25.setText("PM2.5浓度："+PM25);
+            tvAirQua.setText("空气质量："+air_quality);
+
+            int cond=weather.serviceVersion[0].now.cond.code;
+            switch (cond){
+                case 100:
+                    ivCond.setImageResource(R.drawable.c100);
+                    break;
+                case 101:
+                    ivCond.setImageResource(R.drawable.c101);
+                    break;
+                case 102:
+                    ivCond.setImageResource(R.drawable.c102);
+                    break;
+                case 103:
+                    ivCond.setImageResource(R.drawable.c103);
+                    break;
+                case 104:
+                    ivCond.setImageResource(R.drawable.c104);
+                    break;
+
+            }
+/*            String condition_d = weather.serviceVersion[0].daily_forecast[0].cond.txt_d;
             String condition_n = weather.serviceVersion[0].daily_forecast[0].cond.txt_n;
             int tmp_min = weather.serviceVersion[0].daily_forecast[0].tmp.min;
             int tmp_max = weather.serviceVersion[0].daily_forecast[0].tmp.max;
@@ -134,8 +187,11 @@ public class MainActivity extends AppCompatActivity {
                     + "夜晚天气：" + condition_n + "\n"
                     + "气温：" + tmp_min + " ~ " + tmp_max + "\n"
                     + "空气质量：" + air_quality;
-            tvResult.setText(weatherDesc);
+            tvResult.setText(weatherDesc);*/
         } else
-            tvResult.setText(weather.serviceVersion[0].status);
+        {
+
+        }
+
     }
 }
