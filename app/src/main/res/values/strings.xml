@@ -9,4 +9,6 @@
     <string name="confirm">确定</string>
     <string name="loading">加载城市数据中，请稍后。。。\n数据量较大，耐心等不要乱动哦╮(╯▽╰)╭</string>
     <string name="city">City</string>
+    <string name="pull_to_refresh">pull to refresh</string>
+    <string name="updated_at">updated at %1$s</string>
 </resources>

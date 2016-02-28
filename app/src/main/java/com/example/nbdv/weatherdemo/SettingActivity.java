@@ -1,14 +1,21 @@
 package com.example.nbdv.weatherdemo;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -20,7 +27,9 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.nbdv.weatherdemo.View.RefreshableView;
 import com.example.nbdv.weatherdemo.model.City;
 import com.example.nbdv.weatherdemo.model.Province;
 
@@ -30,16 +39,23 @@ import java.util.List;
 import static android.widget.AdapterView.*;
 
 public class SettingActivity extends AppCompatActivity {
+    public final static int DATA_LOADING=1;
+    public final static int DATA_LOADING_FINISHED=2;
+    public final static int DATA_LOADING_FAULT=3;
+    public final static int NO_CITY_AROUND=4;
+    public final static int CITY_FOUND=5;
     private EditText etCity;
     private TextView progressHint;
     private Button btConfirm;
     private Spinner spProvince;
     private Spinner spCity;
+    private RefreshableView refreshView;
     private Context context;
     private String cityName;
     private String id;
     private String savedCityName;
     private String savedCityId;
+    private City savedCity;
     private List<Province> provinceList;
     private List<City> cityList;
     private List<String> provinceNameList;
@@ -48,7 +64,11 @@ public class SettingActivity extends AppCompatActivity {
     private ArrayAdapter cityAdapter;
     private WeatherDB weatherDB;
     private City chosenCity;
-    private boolean needSelectCity=false;
+    private boolean needSelectCity = false;
+    private LocationManager locationManager;
+    private Location location;
+    private LocationListener locationListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,25 +77,82 @@ public class SettingActivity extends AppCompatActivity {
         init();
 
 
+        locationManager = (LocationManager) this.getSystemService(context.LOCATION_SERVICE);
+        /*locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                updateCityByLocation(location);
 
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };*/
+
+        refreshView.setOnRefreshListener(new RefreshableView.PullToRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+                /*locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);*/
+                location = locationManager.getLastKnownLocation(locationManager.NETWORK_PROVIDER);
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        savedCity=weatherDB.getCityByLocation(location);
+                        if(savedCity.getCityId()==null)
+                            handler.sendEmptyMessage(NO_CITY_AROUND);
+                        else
+                        {
+                            savedCityId=savedCity.getCityId();
+                            savedCityName=savedCity.getCityName();
+                            handler.sendEmptyMessage(CITY_FOUND);
+                        }
+
+                    }
+                });
+                thread.start();
+            }
+        });
     }
 
-    private void init(){
-        context=SettingActivity.this;
-        etCity=(EditText)findViewById(R.id.etCity);
-        btConfirm= (Button) findViewById(R.id.btConfirm);
-        spProvince= (Spinner) findViewById(R.id.spProvince);
-        spCity= (Spinner) findViewById(R.id.spCity);
-        progressHint= (TextView) findViewById(R.id.progressHint);
-        id="";
-        weatherDB=new WeatherDB(context,handler);
-        provinceNameList=new ArrayList<String>();
-        cityNameList=new ArrayList<String>();
+    private void init() {
+        context = SettingActivity.this;
+        etCity = (EditText) findViewById(R.id.etCity);
+        btConfirm = (Button) findViewById(R.id.btConfirm);
+        spProvince = (Spinner) findViewById(R.id.spProvince);
+        spCity = (Spinner) findViewById(R.id.spCity);
+        progressHint = (TextView) findViewById(R.id.progressHint);
+        refreshView = (RefreshableView) findViewById(R.id.refreshView);
+        id = "";
+        weatherDB = new WeatherDB(context, handler);
+        provinceNameList = new ArrayList<String>();
+        cityNameList = new ArrayList<String>();
 
 
-        provinceAdapter=new ArrayAdapter(context,android.R.layout.simple_spinner_dropdown_item,provinceNameList);
+        provinceAdapter = new ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, provinceNameList);
         spProvince.setAdapter(provinceAdapter);
-        cityAdapter=new ArrayAdapter(context,android.R.layout.simple_spinner_dropdown_item,cityNameList);
+        cityAdapter = new ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, cityNameList);
         spCity.setAdapter(cityAdapter);
         /*
         *获取本地保存数据
@@ -83,18 +160,18 @@ public class SettingActivity extends AppCompatActivity {
         * 2.是否已经将城市数据下载到数据库
         **/
 
-        SharedPreferences sp=context.getSharedPreferences("Preference", MODE_PRIVATE);
-        savedCityName=sp.getString("city","");
-        savedCityId=sp.getString("id","");
-        boolean isDownloaded=sp.getBoolean("download",false);
+        SharedPreferences sp = context.getSharedPreferences("Preference", MODE_PRIVATE);
+        savedCityName = sp.getString("city", "");
+        savedCityId = sp.getString("id", "");
+        boolean isDownloaded = sp.getBoolean("download", false);
 
 
         //如果未下载城市数据，则下载
-        if(!isDownloaded) {
+        if (!isDownloaded) {
             weatherDB.PrepareDatabase();
 
 
-        }else{
+        } else {
             //如已经下载到数据库，则从数据库读取到列表
 
             updateSpinner();
@@ -107,38 +184,34 @@ public class SettingActivity extends AppCompatActivity {
     }
 
     //提交按钮监听
-    private OnClickListener confirmButtonListener =new OnClickListener() {
+    private OnClickListener confirmButtonListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            cityName=etCity.getText().toString();
-            if(etCity.getText().toString().equals(chosenCity.getCityName()))
-            {
+            cityName = etCity.getText().toString();
+            if (etCity.getText().toString().equals(chosenCity.getCityName())) {
                 //输入的城市名称、id保存到本地
-                SharedPreferences sp=context.getSharedPreferences("Preference",MODE_PRIVATE);
-                SharedPreferences.Editor editor=sp.edit();
-                editor.putString("id",chosenCity.getCityId());
-                editor.putString("city",chosenCity.getCityName());
+                SharedPreferences sp = context.getSharedPreferences("Preference", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sp.edit();
+                editor.putString("id", chosenCity.getCityId());
+                editor.putString("city", chosenCity.getCityName());
                 editor.commit();
                 //将输入的城市名称回传给mainactivity
-                Intent data=new Intent();
+                Intent data = new Intent();
                 data.putExtra("id", chosenCity.getCityId());
-                data.putExtra("city",chosenCity.getCityName());
+                data.putExtra("city", chosenCity.getCityName());
                 setResult(1, data);//1---根据id查询
 
 
-            }else
-            {
+            } else {
                 //输入的城市名称保存到本地
-                SharedPreferences sp=context.getSharedPreferences("Preference",MODE_PRIVATE);
-                SharedPreferences.Editor editor=sp.edit();
+                SharedPreferences sp = context.getSharedPreferences("Preference", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sp.edit();
                 editor.remove("id");
-                editor.putString("city",cityName);
+                editor.putString("city", cityName);
                 editor.commit();
-                Intent data=new Intent();
+                Intent data = new Intent();
                 data.putExtra("city", cityName);
                 setResult(2, data);//2---根据名称查询
-
-
             }
 
             finish();
@@ -151,8 +224,8 @@ public class SettingActivity extends AppCompatActivity {
     private OnItemSelectedListener provinceSelectedListener = new OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            Spinner spProvince= (Spinner) parent;
-            String prov=spProvince.getSelectedItem().toString();
+            Spinner spProvince = (Spinner) parent;
+            String prov = spProvince.getSelectedItem().toString();
             showCityList(prov);
         }
 
@@ -161,11 +234,11 @@ public class SettingActivity extends AppCompatActivity {
 
         }
     };
-    private OnItemSelectedListener citySelectedListener=new OnItemSelectedListener() {
+    private OnItemSelectedListener citySelectedListener = new OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            String city=parent.getSelectedItem().toString();
-            chosenCity=cityList.get(parent.getSelectedItemPosition());
+            String city = parent.getSelectedItem().toString();
+            chosenCity = cityList.get(parent.getSelectedItemPosition());
             etCity.setText(city);
         }
 
@@ -177,81 +250,105 @@ public class SettingActivity extends AppCompatActivity {
 
     };
 
-    private Handler handler=new Handler(){
+    private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if(msg.what==1)
+            if (msg.what == DATA_LOADING) {
+
+            } else if (msg.what == 2) {
+
+            } else if (msg.what == 3) {
+
+            }
+            switch (msg.what)
             {
-                //开始加载
-                progressHint.setVisibility(VISIBLE);
-            }
-            if(msg.what==2) {
-                //加载完成，将数据库置为已下载状态，并更新界面
-                SharedPreferences sp = context.getSharedPreferences("Preference", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sp.edit();
-                editor.putBoolean("download", true);
-                editor.commit();
-                updateSpinner();
-                progressHint.setVisibility(GONE);
-            }
-            if(msg.what==3){
-                //数据加载失败
-                progressHint.setText(" (＞﹏＜) \n你的网络是不是有问题啊亲");
+                case DATA_LOADING:
+                    //开始加载
+                    progressHint.setVisibility(VISIBLE);
+                    break;
+                case DATA_LOADING_FINISHED:
+                    //加载完成，将数据库置为已下载状态，并更新界面
+                    SharedPreferences sp = context.getSharedPreferences("Preference", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sp.edit();
+                    editor.putBoolean("download", true);
+                    editor.commit();
+                    updateSpinner();
+                    progressHint.setVisibility(GONE);
+                    break;
+                case DATA_LOADING_FAULT:
+                    //数据加载失败
+                    progressHint.setText(" (＞﹏＜) \n你的网络是不是有问题啊亲");
+                    break;
+                case NO_CITY_AROUND:
+                    Toast.makeText(context,"no city found around",Toast.LENGTH_SHORT).show();
+                    refreshView.finishRefreshing();
+                    break;
+                case CITY_FOUND:
+                    updateSpinner();
+                    refreshView.finishRefreshing();
+                    break;
             }
         }
 
     };
+
     /*
     * 刷新spinner控件
     * 从数据库读入省份列表，根据选择的省份读取城市列表
     * */
-    private void updateSpinner(){
+    private void updateSpinner() {
         showProvinceList();
-        if(savedCityId!=""){
+        if (savedCityId != "") {
             //当已经保存了id，则直接在spinner选中保存的城市
-            spProvince.setSelection(provinceNameList.indexOf(weatherDB.getProvinceNameById(savedCityId)));
-            needSelectCity=true;
-        }else if(savedCityName!=""){
+            String provName=weatherDB.getProvinceNameById(savedCityId);
+            spProvince.setSelection(provinceNameList.indexOf(provName));
+            needSelectCity = true;
+            showCityList(provName);
+        } else if (savedCityName != "") {
             //当未保存id，只保存了城市名称，则尝试搜索城市，如果有则在spinner中选择
         }
     }
-    private void showProvinceList()
-    {
-        provinceList=weatherDB.getProvinceList();
+
+    private void showProvinceList() {
+        provinceList = weatherDB.getProvinceList();
         provinceNameList.clear();
-        for (Province province:provinceList) {
+        for (Province province : provinceList) {
             provinceNameList.add(province.getProvinceName());
         }
         provinceAdapter.notifyDataSetChanged();
 
     }
-    private void showCityList(String provinceName){
-        cityList=weatherDB.getCityList(provinceName);
+
+    private void showCityList(String provinceName) {
+        cityList = weatherDB.getCityList(provinceName);
         cityNameList.clear();
-        for(City city:cityList){
+        for (City city : cityList) {
             cityNameList.add(city.getCityName());
         }
 
         cityAdapter.notifyDataSetChanged();
-        if(needSelectCity)
-        {
+        if (needSelectCity) {
             spCity.setSelection(cityNameList.indexOf(savedCityName));
-            needSelectCity=false;
+            needSelectCity = false;
         }
     }
+
     /**
      * 根据值, 设置spinner默认选中:
+     *
      * @param spinner
      * @param value
      */
-    private int getSpinnerItemByValue(Spinner spinner,String value){
-        SpinnerAdapter apsAdapter= spinner.getAdapter(); //得到SpinnerAdapter对象
-        int k= apsAdapter.getCount();
-        for(int i=0;i<k;i++){
-            if(value.equals(apsAdapter.getItem(i).toString())){
+    private int getSpinnerItemByValue(Spinner spinner, String value) {
+        SpinnerAdapter apsAdapter = spinner.getAdapter(); //得到SpinnerAdapter对象
+        int k = apsAdapter.getCount();
+        for (int i = 0; i < k; i++) {
+            if (value.equals(apsAdapter.getItem(i).toString())) {
                 return i;
             }
         }
         return -1;
     }
+
+
 }

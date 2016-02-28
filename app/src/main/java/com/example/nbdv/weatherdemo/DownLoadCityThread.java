@@ -41,7 +41,7 @@ public class DownLoadCityThread extends Thread {
         result="";
         URL url= null;
         HttpsURLConnection httpsURLConnection;
-        handler.sendEmptyMessage(1);
+        handler.sendEmptyMessage(SettingActivity.DATA_LOADING);
         try {
             url = new URL(requestURL);
             httpsURLConnection= (HttpsURLConnection) url.openConnection();
@@ -72,7 +72,7 @@ public class DownLoadCityThread extends Thread {
 
                 //创建新表
                 db.execSQL("DROP TABLE IF EXISTS city");
-                db.execSQL("CREATE TABLE city(city VARCHAR,cnty VARCHAR,id VARCHAR PRIMARY KEY,lat VARCHAR,lon VARCHAR,prov VARCHAR)");
+                db.execSQL("CREATE TABLE city(city VARCHAR,cnty VARCHAR,id VARCHAR PRIMARY KEY,lat float,lon float,prov VARCHAR)");
                 for (CityInfo cityInfo:cities.city_info
                      ) {
                     //执行插入语句,将城市数据插入数据库
@@ -80,23 +80,23 @@ public class DownLoadCityThread extends Thread {
                 }
                 db.close();
 
-                handler.sendEmptyMessage(2);
+                handler.sendEmptyMessage(SettingActivity.DATA_LOADING_FINISHED);
             }else
             {
                 //未正常下载数据
                 Log.i("status",cities.status);
-                handler.sendEmptyMessage(3);
+                handler.sendEmptyMessage(SettingActivity.DATA_LOADING_FAULT);
             }
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
-            handler.sendEmptyMessage(3);
+            handler.sendEmptyMessage(SettingActivity.DATA_LOADING_FAULT);
         } catch (ProtocolException e) {
             e.printStackTrace();
-            handler.sendEmptyMessage(3);
+            handler.sendEmptyMessage(SettingActivity.DATA_LOADING_FAULT);
         } catch (IOException e) {
             e.printStackTrace();
-            handler.sendEmptyMessage(3);
+            handler.sendEmptyMessage(SettingActivity.DATA_LOADING_FAULT);
             Log.e("error","internet wrong");
         }
 

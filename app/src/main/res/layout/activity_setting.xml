@@ -1,84 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <LinearLayout
+    <com.example.nbdv.weatherdemo.View.RefreshableView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:id="@+id/refreshView">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/InputHint"/>
+                android:text="@string/InputHint" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
+
                 <TextView
                     android:layout_width="70dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/Province"/>
+                    android:text="@string/Province" />
 
                 <Spinner
+                    android:id="@+id/spProvince"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:id="@+id/spProvince"
                     android:layout_weight="1" />
 
             </LinearLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
+
                 <TextView
                     android:layout_width="70dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/City"/>
+                    android:text="@string/City" />
 
                 <Spinner
+                    android:id="@+id/spCity"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:id="@+id/spCity"
                     android:layout_weight="1" />
 
             </LinearLayout>
 
             <EditText
+                android:id="@+id/etCity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/etCity"
-                android:hint="@string/inputCityName"/>
+                android:hint="@string/inputCityName" />
 
             <Button
+                android:id="@+id/btConfirm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/confirm"
-                android:id="@+id/btConfirm" />
+                android:text="@string/confirm" />
 
 
+        </LinearLayout>
 
-
-    </LinearLayout>
-
-    <!--ProgressBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:id="@+id/progressBar"
-        android:indeterminate="true" /-->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="invisible"
-        android:id="@+id/progressHint"
-        android:text="@string/loading"/>
-
+        <!--ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/progressBar"
+            android:indeterminate="true" /-->
+        <TextView
+            android:id="@+id/progressHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/loading"
+            android:visibility="invisible" />
+    </com.example.nbdv.weatherdemo.View.RefreshableView>
 
 </FrameLayout>

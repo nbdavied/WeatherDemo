@@ -6,6 +6,11 @@ package com.example.nbdv.weatherdemo.model;
 public class City {
     private String cityName;
     private String cityId;
+    private double lon;
+    private double lat;
+
+    public City() {
+    }
 
     public City(String cityName, String cityId) {
         this.cityId = cityId;
@@ -28,4 +33,19 @@ public class City {
         return cityName;
     }
 
+    public double getLat() {
+        return lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public void setLon(double lon) {
+        this.lon = lon;
+    }
 }
