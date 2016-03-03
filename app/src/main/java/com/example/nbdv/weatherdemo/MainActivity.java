@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvAirQua;
     private TextView tvPM25;
     private ImageView ivCond;
+    private Button sendMail;
     private ProgressBar progressBar;
     private String city;    //选定的城市名称
     private String id;      //城市id
@@ -59,6 +61,16 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, SettingActivity.class);
                 startActivityForResult(intent, 1);
+            }
+        });
+        sendMail.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(Intent.ACTION_SEND);
+                intent.putExtra(Intent.EXTRA_EMAIL,"nbdavied@gmail.com");
+                intent.putExtra(Intent.EXTRA_SUBJECT,"hello mail");
+                intent.setType("text/plain");
+                startActivity(intent);
             }
         });
     }
@@ -97,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         tvPM25 = (TextView) findViewById(R.id.tvPM25);
         ivCond= (ImageView) findViewById(R.id.ivCond);
         progressBar=(ProgressBar) findViewById(R.id.progressBar);
-
+        sendMail= (Button) findViewById(R.id.sendMail);
         weather = new Weather();
         //查看本地是否存储城市名称或id，如有则直接载入
         SharedPreferences sp = MainActivity.this.getSharedPreferences("Preference", MODE_PRIVATE);

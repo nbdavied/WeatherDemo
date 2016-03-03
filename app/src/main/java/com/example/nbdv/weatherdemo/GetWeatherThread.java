@@ -97,36 +97,7 @@ public class GetWeatherThread extends Thread {
             bundle.putString("weatherString",result);
             msg.setData(bundle);
             handler.sendMessage(msg);
-            /*handler.post(new Runnable() {
-                @Override
-                public void run() {
 
-                    *//*Weather weather = new Weather();
-
-                    Gson gson = new Gson();
-                    weather = gson.fromJson(result, Weather.class);
-                    if (weather.serviceVersion[0].status.equals("ok")) {
-                        String condition_d = weather.serviceVersion[0].daily_forecast[0].cond.txt_d;
-                        String condition_n = weather.serviceVersion[0].daily_forecast[0].cond.txt_n;
-                        int tmp_min = weather.serviceVersion[0].daily_forecast[0].tmp.min;
-                        int tmp_max = weather.serviceVersion[0].daily_forecast[0].tmp.max;
-                        String air_quality;
-                        if (weather.serviceVersion[0].aqi != null) {
-                            air_quality = weather.serviceVersion[0].aqi.city.qlty;
-                        } else {
-                            air_quality = "no data";
-                        }
-
-                        String weatherDesc = "白天天气：" + condition_d + "\n"
-                                + "夜晚天气：" + condition_n + "\n"
-                                + "气温：" + tmp_min + " ~ " + tmp_max + "\n"
-                                + "空气质量：" + air_quality;
-                        tvResult.setText(weatherDesc);
-                    } else
-                        tvResult.setText(weather.serviceVersion[0].status);*//*
-
-                }
-            });*/
         } catch (MalformedURLException e) {
             Log.e("error","url");
             e.printStackTrace();
