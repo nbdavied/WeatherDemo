@@ -11,6 +11,8 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import com.example.nbdv.weatherdemo.Service.WidgetUpdateService;
+
 /**
  * Created by nbdav on 2016/2/29.
  */
@@ -19,7 +21,7 @@ public class WeatherWidgetProvider extends AppWidgetProvider {
     int[] widgetIds;
     Context context;
     AppWidgetManager appWidgetManager;
-    Handler handler=new Handler(){
+/*    Handler handler=new Handler(){
         @Override
         public void handleMessage(Message msg) {
             RemoteViews rviews=new RemoteViews(context.getPackageName(),R.layout.widget_layout);
@@ -27,10 +29,12 @@ public class WeatherWidgetProvider extends AppWidgetProvider {
             for(int i=0;i<widgetIds.length;i++)
             appWidgetManager.updateAppWidget(widgetIds[i], rviews);
         }
-    };
+    };*/
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        sp=context.getSharedPreferences("Preference",Context.MODE_PRIVATE);
+        Intent intent=new Intent(context, WidgetUpdateService.class);
+        context.startService(intent);
+/*        sp=context.getSharedPreferences("Preference",Context.MODE_PRIVATE);
         this.appWidgetManager=appWidgetManager;
         String cityName=sp.getString("city","");
         String cityId=sp.getString("id","");
@@ -49,7 +53,7 @@ public class WeatherWidgetProvider extends AppWidgetProvider {
                 handler.sendEmptyMessage(0);
             }
         });
-        newthread.start();
+        newthread.start();*/
     }
 
     @Override

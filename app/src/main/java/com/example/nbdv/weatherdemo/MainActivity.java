@@ -166,24 +166,8 @@ public class MainActivity extends AppCompatActivity {
             tvAirQua.setText("空气质量："+air_quality);
 
             int cond=weather.serviceVersion[0].now.cond.code;
-            switch (cond){
-                case 100:
-                    ivCond.setImageResource(R.drawable.c100);
-                    break;
-                case 101:
-                    ivCond.setImageResource(R.drawable.c101);
-                    break;
-                case 102:
-                    ivCond.setImageResource(R.drawable.c102);
-                    break;
-                case 103:
-                    ivCond.setImageResource(R.drawable.c103);
-                    break;
-                case 104:
-                    ivCond.setImageResource(R.drawable.c104);
-                    break;
+            ivCond.setImageResource(Weather.getConditionImage(cond));
 
-            }
 /*            String condition_d = weather.serviceVersion[0].daily_forecast[0].cond.txt_d;
             String condition_n = weather.serviceVersion[0].daily_forecast[0].cond.txt_n;
             int tmp_min = weather.serviceVersion[0].daily_forecast[0].tmp.min;

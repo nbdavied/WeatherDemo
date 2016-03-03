@@ -1,10 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <TextView
-        android:layout_width="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="weather"
-        android:id="@+id/tvCity"/>
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvWidgetDay1"
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:gravity="center_horizontal"
+            android:text="@string/today" />
+
+        <ImageView
+            android:id="@+id/ivWidgetCondition1"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/c100" />
+
+        <TextView
+            android:id="@+id/tvWidgetTemp1"
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:gravity="center_horizontal"
+            android:text="1℃" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvWidgetDay2"
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:gravity="center_horizontal"
+            android:text="@string/today" />
+
+        <ImageView
+            android:id="@+id/ivWidgetCondition2"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/c100" />
+
+        <TextView
+            android:id="@+id/tvWidgetTemp2"
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:gravity="center_horizontal"
+            android:text="1℃" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvWidgetDay3"
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:gravity="center_horizontal"
+            android:text="@string/today" />
+
+        <ImageView
+            android:id="@+id/ivWidgetCondition3"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/c100" />
+
+        <TextView
+            android:id="@+id/tvWidgetTemp3"
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:gravity="center_horizontal"
+            android:text="1℃" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvWidgetDay4"
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:gravity="center_horizontal"
+            android:text="@string/today" />
+
+        <ImageView
+            android:id="@+id/ivWidgetCondition4"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/c100" />
+
+        <TextView
+            android:id="@+id/tvWidgetTemp4"
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:gravity="center_horizontal"
+            android:text="1℃" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvWidgetDay5"
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:gravity="center_horizontal"
+            android:text="@string/today" />
+
+        <ImageView
+            android:id="@+id/ivWidgetCondition5"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/c100" />
+
+        <TextView
+            android:id="@+id/tvWidgetTemp5"
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:gravity="center_horizontal"
+            android:text="1℃" />
+    </LinearLayout>
+
 </LinearLayout>
