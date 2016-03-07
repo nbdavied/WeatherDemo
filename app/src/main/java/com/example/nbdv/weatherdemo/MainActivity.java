@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.nbdv.weatherdemo.View.LineChart;
 import com.google.gson.Gson;
 
 
@@ -28,8 +29,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvAirQua;
     private TextView tvPM25;
     private ImageView ivCond;
-    private Button sendMail;
     private ProgressBar progressBar;
+    private LineChart lineChart;
     private String city;    //选定的城市名称
     private String id;      //城市id
     private Weather weather;
@@ -63,16 +64,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, 1);
             }
         });
-        sendMail.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(Intent.ACTION_SEND);
-                intent.putExtra(Intent.EXTRA_EMAIL,"nbdavied@gmail.com");
-                intent.putExtra(Intent.EXTRA_SUBJECT,"hello mail");
-                intent.setType("text/plain");
-                startActivity(intent);
-            }
-        });
+
     }
 
     /*
@@ -109,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
         tvPM25 = (TextView) findViewById(R.id.tvPM25);
         ivCond= (ImageView) findViewById(R.id.ivCond);
         progressBar=(ProgressBar) findViewById(R.id.progressBar);
-        sendMail= (Button) findViewById(R.id.sendMail);
+        lineChart= (LineChart) findViewById(R.id.lineChart);
         weather = new Weather();
         //查看本地是否存储城市名称或id，如有则直接载入
         SharedPreferences sp = MainActivity.this.getSharedPreferences("Preference", MODE_PRIVATE);
@@ -168,22 +160,16 @@ public class MainActivity extends AppCompatActivity {
             int cond=weather.serviceVersion[0].now.cond.code;
             ivCond.setImageResource(Weather.getConditionImage(cond));
 
-/*            String condition_d = weather.serviceVersion[0].daily_forecast[0].cond.txt_d;
-            String condition_n = weather.serviceVersion[0].daily_forecast[0].cond.txt_n;
-            int tmp_min = weather.serviceVersion[0].daily_forecast[0].tmp.min;
-            int tmp_max = weather.serviceVersion[0].daily_forecast[0].tmp.max;
-            String air_quality;
-            if (weather.serviceVersion[0].aqi != null) {
-                air_quality = weather.serviceVersion[0].aqi.city.qlty;
-            } else {
-                air_quality = "no data";
+            //设置LineChart属性
+            int lenth=weather.serviceVersion[0].daily_forecast.length;
+            int lowTemp[]=new int[lenth];
+            int highTemp[]=new int[lenth];
+            for(int i=0;i<lenth;i++)
+            {
+                lowTemp[i]=weather.serviceVersion[0].daily_forecast[i].tmp.min;
+                highTemp[i]=weather.serviceVersion[0].daily_forecast[i].tmp.max;
             }
-
-            String weatherDesc = "白天天气：" + condition_d + "\n"
-                    + "夜晚天气：" + condition_n + "\n"
-                    + "气温：" + tmp_min + " ~ " + tmp_max + "\n"
-                    + "空气质量：" + air_quality;
-            tvResult.setText(weatherDesc);*/
+            lineChart.setTemperature(lowTemp,highTemp);
         } else
         {
 

@@ -84,7 +84,7 @@ public class SettingActivity extends AppCompatActivity {
                     //                                          int[] grantResults)
                     // to handle the case where the user grants the permission. See the documentation
                     // for ActivityCompat#requestPermissions for more details.
-                    ActivityCompat.requestPermissions(SettingActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},0);
+                    //ActivityCompat.requestPermissions(SettingActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},0);
                     return;
                 }
                 /*locationManager.requestLocationUpdates(LocationManager.NETWORK_PRO`VIDER, 0, 0, locationListener);*/

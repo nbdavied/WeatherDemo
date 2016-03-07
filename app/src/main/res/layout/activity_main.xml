@@ -14,7 +14,8 @@
         android:padding="25dp"
         android:paddingTop="50dp"
         app:cardPreventCornerOverlap="false"
-        app:cardUseCompatPadding="true">
+        app:cardUseCompatPadding="true"
+        android:id="@+id/cardview">
 
         <LinearLayout
 
@@ -27,7 +28,8 @@
             android:paddingTop="10dp"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             tools:context="com.example.nbdv.weatherdemo.MainActivity"
-            tools:showIn="@layout/activity_main">
+            tools:showIn="@layout/activity_main"
+            >
 
 
             <LinearLayout
@@ -95,15 +97,20 @@
                     android:layout_weight="1"
                     />
             </LinearLayout>
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/sendMail"
-                android:text="send mail"/>
+
 
         </LinearLayout>
     </android.support.v7.widget.CardView>
+    <com.example.nbdv.weatherdemo.View.LineChart
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_below="@id/cardview"
+        app:y_min="180dp"
+        app:y_max="15dp"
+        app:x_min="20dp"
 
+        android:id="@+id/lineChart"
+        />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabSetting"
