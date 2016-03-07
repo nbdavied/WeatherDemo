@@ -148,6 +148,40 @@ public class Weather {
             case 104:
                 result = R.drawable.c104;
                 break;
+            case 200:
+                result = R.drawable.c200;
+                break;
+            case 300:
+                result = R.drawable.c300;
+                break;
+            case 301:
+                result = R.drawable.c301;
+                break;
+            case 302:
+                result = R.drawable.c302;
+                break;
+            case 303:
+                result = R.drawable.c303;
+                break;
+            case 304:
+                result = R.drawable.c304;
+                break;
+            case 305:
+                result = R.drawable.c305;
+                break;
+            case 306:
+                result = R.drawable.c306;
+                break;
+            case 307:
+                result = R.drawable.c307;
+                break;
+            case 308:
+                result = R.drawable.c308;
+                break;
+            case 309:
+                result = R.drawable.c309;
+                break;
+
             default:
                 result = R.drawable.c100;
         }
