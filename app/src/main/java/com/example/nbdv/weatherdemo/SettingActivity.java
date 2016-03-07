@@ -5,25 +5,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.EditText;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
@@ -36,14 +31,16 @@ import com.example.nbdv.weatherdemo.model.Province;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.widget.AdapterView.*;
+import static android.widget.AdapterView.GONE;
+import static android.widget.AdapterView.OnItemSelectedListener;
+import static android.widget.AdapterView.VISIBLE;
 
 public class SettingActivity extends AppCompatActivity {
-    public final static int DATA_LOADING=1;
-    public final static int DATA_LOADING_FINISHED=2;
-    public final static int DATA_LOADING_FAULT=3;
-    public final static int NO_CITY_AROUND=4;
-    public final static int CITY_FOUND=5;
+    public final static int DATA_LOADING = 1;
+    public final static int DATA_LOADING_FINISHED = 2;
+    public final static int DATA_LOADING_FAULT = 3;
+    public final static int NO_CITY_AROUND = 4;
+    public final static int CITY_FOUND = 5;
     private EditText etCity;
     private TextView progressHint;
     private Button btConfirm;
@@ -75,32 +72,7 @@ public class SettingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_setting);
 
         init();
-
-
         locationManager = (LocationManager) this.getSystemService(context.LOCATION_SERVICE);
-        /*locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                updateCityByLocation(location);
-
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-            }
-        };*/
-
         refreshView.setOnRefreshListener(new RefreshableView.PullToRefreshListener() {
             @Override
             public void onRefresh() {
@@ -112,23 +84,22 @@ public class SettingActivity extends AppCompatActivity {
                     //                                          int[] grantResults)
                     // to handle the case where the user grants the permission. See the documentation
                     // for ActivityCompat#requestPermissions for more details.
+                    ActivityCompat.requestPermissions(SettingActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},0);
                     return;
                 }
-                /*locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);*/
+                /*locationManager.requestLocationUpdates(LocationManager.NETWORK_PRO`VIDER, 0, 0, locationListener);*/
                 location = locationManager.getLastKnownLocation(locationManager.NETWORK_PROVIDER);
                 Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        savedCity=weatherDB.getCityByLocation(location);
-                        if(savedCity.getCityId()==null)
+                        savedCity = weatherDB.getCityByLocation(location);
+                        if (savedCity.getCityId() == null)
                             handler.sendEmptyMessage(NO_CITY_AROUND);
-                        else
-                        {
-                            savedCityId=savedCity.getCityId();
-                            savedCityName=savedCity.getCityName();
+                        else {
+                            savedCityId = savedCity.getCityId();
+                            savedCityName = savedCity.getCityName();
                             handler.sendEmptyMessage(CITY_FOUND);
                         }
-
                     }
                 });
                 thread.start();
@@ -136,7 +107,19 @@ public class SettingActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if(requestCode==0)
+        {
+            if(grantResults[0]==PackageManager.PERMISSION_GRANTED)
+            {
+
+            }
+        }
+    }
+
     private void init() {
+        //初始化控件
         context = SettingActivity.this;
         etCity = (EditText) findViewById(R.id.etCity);
         btConfirm = (Button) findViewById(R.id.btConfirm);
@@ -149,7 +132,7 @@ public class SettingActivity extends AppCompatActivity {
         provinceNameList = new ArrayList<String>();
         cityNameList = new ArrayList<String>();
 
-
+        //设置adapter
         provinceAdapter = new ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, provinceNameList);
         spProvince.setAdapter(provinceAdapter);
         cityAdapter = new ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, cityNameList);
@@ -260,8 +243,7 @@ public class SettingActivity extends AppCompatActivity {
             } else if (msg.what == 3) {
 
             }
-            switch (msg.what)
-            {
+            switch (msg.what) {
                 case DATA_LOADING:
                     //开始加载
                     progressHint.setVisibility(VISIBLE);
@@ -280,7 +262,7 @@ public class SettingActivity extends AppCompatActivity {
                     progressHint.setText(" (＞﹏＜) \n你的网络是不是有问题啊亲");
                     break;
                 case NO_CITY_AROUND:
-                    Toast.makeText(context,"no city found around",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "no city found around", Toast.LENGTH_SHORT).show();
                     refreshView.finishRefreshing();
                     break;
                 case CITY_FOUND:
@@ -300,7 +282,7 @@ public class SettingActivity extends AppCompatActivity {
         showProvinceList();
         if (savedCityId != "") {
             //当已经保存了id，则直接在spinner选中保存的城市
-            String provName=weatherDB.getProvinceNameById(savedCityId);
+            String provName = weatherDB.getProvinceNameById(savedCityId);
             spProvince.setSelection(provinceNameList.indexOf(provName));
             needSelectCity = true;
             showCityList(provName);
