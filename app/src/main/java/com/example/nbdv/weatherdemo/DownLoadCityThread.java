@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.util.Log;
 
-import com.example.nbdv.weatherdemo.json.JsonCities;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -62,9 +61,10 @@ public class DownLoadCityThread extends Thread {
             httpsURLConnection.disconnect();
 
             //解析json
-            JsonCities cities;
+            //result="{\"city_info\":[{\"city\":\"ABCD\",\"cnty\":\"中国\",\"id\":\"CN101310230\",\"lat\":\"11.26\",\"lon\":\"114.20\",\"prov\":\"海南\"},{\"city\":\"北京\",\"cnty\":\"中国\",\"id\":\"CN101010100\",\"lat\":\"39.904000\",\"lon\":\"116.391000\",\"prov\":\"直辖市\"},{\"city\":\"海淀\",\"cnty\":\"中国\",\"id\":\"CN101010200\",\"lat\":\"39.590000\",\"lon\":\"116.170000\",\"prov\":\"直辖市\"}],\"status\":\"ok\"}";
+            Cities cities;
             Gson gson=new Gson();
-            cities=gson.fromJson(result,JsonCities.class);
+            cities=gson.fromJson(result,Cities.class);
             if(cities.status.equals("ok")){
                 //当数据正常下载，则导入数据库
                 Log.i("status", "download success");
@@ -73,7 +73,7 @@ public class DownLoadCityThread extends Thread {
                 //创建新表
                 db.execSQL("DROP TABLE IF EXISTS city");
                 db.execSQL("CREATE TABLE city(city VARCHAR,cnty VARCHAR,id VARCHAR PRIMARY KEY,lat float,lon float,prov VARCHAR)");
-                for (JsonCities.CityInfo cityInfo:cities.city_info
+                for (CityInfo cityInfo:cities.city_info
                      ) {
                     //执行插入语句,将城市数据插入数据库
                     db.execSQL("insert into city values(?,?,?,?,?,?)",new Object[]{cityInfo.city,cityInfo.cnty,cityInfo.id,cityInfo.lat,cityInfo.lon,cityInfo.prov});

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="LineChart">
-        <attr name="top_dis" format="dimension"/>
-        <attr name="bottom_dis" format="dimension"/>
-        <attr name="right_dis" format="dimension"/>
-        <attr name="left_dis" format="dimension"/>
+        <attr name="y_max" format="dimension"/>
+        <attr name="y_min" format="dimension"/>
+        <attr name="x_max" format="dimension"/>
+        <attr name="x_min" format="dimension"/>
         <attr name="low_color" format="color"/>
         <attr name="high_color" format="color"/>
         <attr name="low_text_color" format="color"/>
         <attr name="high_text_color" format="color"/>
-        <attr name="text_size" format="dimension"/>
+        <attr name="low_text_size" format="dimension"/>
+        <attr name="high_text_size" format="dimension"/>
         <attr name="radius" format="dimension"/>
-        <attr name="stroke_width" format="dimension"/>
     </declare-styleable>
 </resources>
