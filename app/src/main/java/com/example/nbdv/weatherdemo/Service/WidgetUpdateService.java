@@ -13,8 +13,9 @@ import android.widget.RemoteViews;
 
 import com.example.nbdv.weatherdemo.GetWeatherThread;
 import com.example.nbdv.weatherdemo.R;
-import com.example.nbdv.weatherdemo.Weather;
+
 import com.example.nbdv.weatherdemo.WeatherWidgetProvider;
+import com.example.nbdv.weatherdemo.json.JsonWeather;
 import com.google.gson.Gson;
 
 import java.util.Calendar;
@@ -24,7 +25,7 @@ import java.util.TimeZone;
 public class WidgetUpdateService extends Service {
     private String CityName;
     private String CityId;
-    private Weather weather;
+    private JsonWeather weather;
     private AppWidgetManager manager;
     private int[] tvWidgetDay = new int[]{
             R.id.tvWidgetDay1, R.id.tvWidgetDay2, R.id.tvWidgetDay3, R.id.tvWidgetDay4, R.id.tvWidgetDay5
@@ -78,7 +79,7 @@ public class WidgetUpdateService extends Service {
         @Override
         public void handleMessage(Message msg) {
             Gson gson = new Gson();
-            weather = gson.fromJson(msg.getData().getString("weatherString"), Weather.class);
+            weather = gson.fromJson(msg.getData().getString("weatherString"), JsonWeather.class);
             if (weather != null)
                 updateContent();
         }
@@ -98,7 +99,7 @@ public class WidgetUpdateService extends Service {
         for (int i = 0; i < 5; i++) {
             //设置天气状态图片
             cond = weather.serviceVersion[0].daily_forecast[i].cond.code_d;
-            rViews.setImageViewResource(ivWidgetCondition[i], Weather.getConditionImage(cond));
+            rViews.setImageViewResource(ivWidgetCondition[i], JsonWeather.getConditionImage(cond));
             //设置高低气温
             temp_max = weather.serviceVersion[0].daily_forecast[i].tmp.max;
             temp_min = weather.serviceVersion[0].daily_forecast[i].tmp.min;

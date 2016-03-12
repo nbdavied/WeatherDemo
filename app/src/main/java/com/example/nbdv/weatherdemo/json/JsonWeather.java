@@ -1,5 +1,6 @@
-package com.example.nbdv.weatherdemo;
+package com.example.nbdv.weatherdemo.json;
 
+import com.example.nbdv.weatherdemo.R;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
@@ -7,7 +8,7 @@ import java.util.Date;
 /**
  * Created by nbdav on 2016/1/25.
  */
-public class Weather {
+public class JsonWeather {
     @SerializedName("HeWeather data service 3.0")
     public WeatherInfo[] serviceVersion;
 
@@ -24,14 +25,14 @@ public class Weather {
     {
         public City city;
         public class City{
-            int aqi;
-            int co;
-            int no2;
-            int o3;
-            int pm10;
-            int pm25;
-            String qlty;
-            int so2;
+            public int aqi;
+            public int co;
+            public int no2;
+            public int o3;
+            public int pm10;
+            public int pm25;
+            public String qlty;
+            public int so2;
         }
     }
     public class Basic

@@ -172,12 +172,7 @@ public class SettingActivity extends AppCompatActivity {
         public void onClick(View v) {
             cityName = etCity.getText().toString();
             if (etCity.getText().toString().equals(chosenCity.getCityName())) {
-                //输入的城市名称、id保存到本地
-                SharedPreferences sp = context.getSharedPreferences("Preference", MODE_PRIVATE);
-                SharedPreferences.Editor editor = sp.edit();
-                editor.putString("id", chosenCity.getCityId());
-                editor.putString("city", chosenCity.getCityName());
-                editor.commit();
+
                 //将输入的城市名称回传给mainactivity
                 Intent data = new Intent();
                 data.putExtra("id", chosenCity.getCityId());
