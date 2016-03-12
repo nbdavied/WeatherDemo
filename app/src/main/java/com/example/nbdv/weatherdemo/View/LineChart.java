@@ -5,6 +5,9 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Xfermode;
 import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
@@ -16,17 +19,24 @@ import com.example.nbdv.weatherdemo.R;
  * TODO: document your custom view class.
  */
 public class LineChart extends View {
+    private final static int[] dayOfWeek = new int[]{
+            R.string.sunday, R.string.monday, R.string.tuesday, R.string.wednsday, R.string.thursday, R.string.friday, R.string.saturday
+    };
     private float y_min;
     private float y_max;
     private float x_min;
     private float x_max;
-    private float high_text_size;
-    private float low_text_size;
+    private float bottom_dis;
+    private float top_dis;
+    private float left_dis;
+    private float right_dis;
+    private float text_size;
     private float radius;
     private int high_text_color;
     private int low_text_color;
     private int high_color;
     private int low_color;
+    private float stroke_width;
     private int[] low_temp;
     private int[] high_temp;
     private Paint hPaint;
@@ -35,17 +45,17 @@ public class LineChart extends View {
         super(context, attrs);
         TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.LineChart, 0, 0);
         try {
-            y_min = typedArray.getDimension(R.styleable.LineChart_y_min, 0);
-            y_max = typedArray.getDimension(R.styleable.LineChart_y_max, 10);
-            x_min = typedArray.getDimension(R.styleable.LineChart_x_min, 10);
-            x_max = typedArray.getDimension(R.styleable.LineChart_x_max, 0);
-            high_text_size = typedArray.getDimension(R.styleable.LineChart_high_text_size, 20);
-            low_text_size = typedArray.getDimension(R.styleable.LineChart_low_text_size, 20);
+            bottom_dis = typedArray.getDimension(R.styleable.LineChart_bottom_dis, 30);
+            top_dis = typedArray.getDimension(R.styleable.LineChart_top_dis, 30);
+            left_dis = typedArray.getDimension(R.styleable.LineChart_left_dis, 30);
+            right_dis = typedArray.getDimension(R.styleable.LineChart_right_dis, 30);
+            text_size = typedArray.getDimension(R.styleable.LineChart_text_size, 20);
             radius = typedArray.getDimension(R.styleable.LineChart_radius, 3);
-            high_text_color = typedArray.getColor(R.styleable.LineChart_high_text_color, Color.WHITE);
-            low_text_color = typedArray.getColor(R.styleable.LineChart_low_text_color, Color.WHITE);
+            stroke_width=typedArray.getDimension(R.styleable.LineChart_stroke_width,2);
             high_color = typedArray.getColor(R.styleable.LineChart_high_color, Color.RED);
             low_color = typedArray.getColor(R.styleable.LineChart_low_color, Color.BLUE);
+            high_text_color = typedArray.getColor(R.styleable.LineChart_high_text_color, Color.WHITE);
+            low_text_color = typedArray.getColor(R.styleable.LineChart_low_text_color, Color.WHITE);
             setMinimumHeight(150);
         } finally {
             typedArray.recycle();
@@ -56,15 +66,23 @@ public class LineChart extends View {
         hPaint.setColor(high_color);
         lPaint.setColor(low_color);
 
+        hPaint.setTextSize(text_size);
+        lPaint.setTextSize(text_size);
+        hPaint.setTextAlign(Paint.Align.CENTER);
+        lPaint.setTextAlign(Paint.Align.CENTER);
+
+
+        hPaint.setStrokeWidth(stroke_width);
+        lPaint.setStrokeWidth(stroke_width);
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        if(x_max==0)
-            x_max=getWidth()-20;
-        if(y_min==0)
-            y_min=getHeight()-20;
+        y_min=getHeight()-bottom_dis;
+        y_max=top_dis;
+        x_min=left_dis;
+        x_max=getWidth()-right_dis;
     }
 
     @Override
@@ -94,8 +112,10 @@ public class LineChart extends View {
             x=x_min+i*x_distance;
             ly=y_min-(low_temp[i]-lowestTemp)/tempDifference*yDifference;
             hy=y_min-(high_temp[i]-lowestTemp)/tempDifference*yDifference;
-            canvas.drawCircle(x,ly,radius,lPaint);
-            canvas.drawCircle(x,hy,radius,hPaint);
+            canvas.drawCircle(x, ly, radius, lPaint);
+            canvas.drawCircle(x, hy, radius, hPaint);
+            canvas.drawText(String.valueOf(high_temp[i]), x, hy - 5 - text_size / 2, hPaint);
+            canvas.drawText(String.valueOf(low_temp[i]), x, ly + 15 + text_size / 2, lPaint);
             if(i!=0)
             {
                 canvas.drawLine(last_x,last_ly,x,ly,lPaint);

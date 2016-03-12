@@ -88,10 +88,8 @@ public class GetWeatherThread extends Thread {
             }
             httpsURLConnection.disconnect();
 
-//            Gson gson=new Gson();
-//            weather=gson.fromJson(result,Weather.class);
             //刷新控件内容
-            //handler.sendEmptyMessage(0);
+
             Message msg=new Message();
             Bundle bundle=new Bundle();
             bundle.putString("weatherString",result);
@@ -105,5 +103,6 @@ public class GetWeatherThread extends Thread {
             Log.e("error","下载天气信息");
             e.printStackTrace();
         }
+
     }
 }
