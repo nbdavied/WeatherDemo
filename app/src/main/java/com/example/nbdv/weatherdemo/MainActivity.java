@@ -1,5 +1,6 @@
 package com.example.nbdv.weatherdemo;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -11,20 +12,29 @@ import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.nbdv.weatherdemo.Utils.DataStore;
 import com.example.nbdv.weatherdemo.View.LineChart;
 import com.example.nbdv.weatherdemo.View.RefreshableView;
+import com.example.nbdv.weatherdemo.View.VerticalSwipeRefreshLayout;
 import com.example.nbdv.weatherdemo.json.JsonWeather;
 import com.example.nbdv.weatherdemo.model.City;
 import com.google.gson.Gson;
@@ -37,6 +47,7 @@ public class MainActivity extends FragmentActivity {
     //定义控件
 
     private FloatingActionButton fabSetting;
+    private DrawerLayout drawerLayout;
     /*private TextView tvCity;
     private TextView tvTemp;
     private TextView tvTempRange;
@@ -45,15 +56,18 @@ public class MainActivity extends FragmentActivity {
     private ImageView ivCond;*/
     private ProgressBar progressBar;
     //private LineChart lineChart;
-    private SwipeRefreshLayout swipeLayout;
+    private VerticalSwipeRefreshLayout swipeLayout;
     //private FrameLayout fragmentContainer;
     private ViewPager viewPager;
     private List<WeatherInfoFragment> fragList;
+    private List<String> cityNameList;
     private String city;    //选定的城市名称
     private String id;      //城市id
     private JsonWeather weather;
     private WeatherInfoFragmentAdapter fragmentAdapter;
-
+    private ListView drawerListView;
+    private CityListAdapter listViewAdapter;
+    private City[] cities;
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -75,8 +89,10 @@ public class MainActivity extends FragmentActivity {
 
         //findViewById-------------------------------------------------------
         fabSetting = (FloatingActionButton) findViewById(R.id.fabSetting);
-        swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipeLayout);
+        swipeLayout = (VerticalSwipeRefreshLayout) findViewById(R.id.swipeLayout);
         viewPager = (ViewPager) findViewById(R.id.view_pager);
+        drawerListView= (ListView) findViewById(R.id.drawer_list);
+        drawerLayout= (DrawerLayout) findViewById(R.id.drawer_layout);
         //findViewById end here----------------------------------------------
 
         /*tvCity = (TextView) findViewById(R.id.tvCity);
@@ -103,7 +119,8 @@ public class MainActivity extends FragmentActivity {
             DataStore.initDatabase(this);
         }
         fragList = new ArrayList<WeatherInfoFragment>();
-        City[] cities = DataStore.getStoredCities(this);
+        cityNameList=new ArrayList<String>();
+        cities = DataStore.getStoredCities(this);
         //如果未设置城市，直接切换到设置页面
         if (cities.length == 0) {
             Intent intent = new Intent(this, SettingActivity.class);
@@ -114,12 +131,15 @@ public class MainActivity extends FragmentActivity {
                 WeatherInfoFragment fragment = new WeatherInfoFragment();
                 fragList.add(fragment);
                 fragment.setFragmentCity(cities[i].getCityId(), cities[i].getCityName());
+                cityNameList.add(cities[i].getCityName());
             }
         }
-
-
+        //绑定viewPager和fragment
         fragmentAdapter = new WeatherInfoFragmentAdapter(getSupportFragmentManager(), fragList);
         viewPager.setAdapter(fragmentAdapter);
+        //绑定drawer listview 和adapter
+        listViewAdapter=new CityListAdapter(this,R.layout.drawer_item,cityNameList);
+        drawerListView.setAdapter(listViewAdapter);
 
         //点击设置按钮跳转
 
@@ -130,7 +150,9 @@ public class MainActivity extends FragmentActivity {
                 startActivityForResult(intent, 1);
             }
         });
-        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+
+        //下拉刷新
+        swipeLayout.setOnRefreshListener(new VerticalSwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 swipeLayout.post(new Runnable() {
@@ -142,6 +164,16 @@ public class MainActivity extends FragmentActivity {
                     }
                 });
 
+
+            }
+        });
+
+        drawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.i("output","list item clicked:"+cityNameList.get(position));
+                drawerLayout.closeDrawers();
+                viewPager.setCurrentItem(position,true);
 
             }
         });
@@ -162,6 +194,8 @@ public class MainActivity extends FragmentActivity {
             fragList.add(fragment);
             fragment.setFragmentCity(id, city);
             fragmentAdapter.notifyDataSetChanged();
+            cityNameList.add(city);
+            listViewAdapter.notifyDataSetChanged();
         } else if (requestCode == 1 && resultCode == 2) {
             //根据名字查询
             city = data.getStringExtra("city");
@@ -181,7 +215,11 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void Refresh() {
-        //查看本地是否存储城市名称或id，如有则直接载入
+        //遍历fragment，刷新fragment数据
+        for(WeatherInfoFragment fragment:fragList){
+            fragment.refreshData();
+        }
+        /*//查看本地是否存储城市名称或id，如有则直接载入
         SharedPreferences sp = MainActivity.this.getSharedPreferences("Preference", MODE_PRIVATE);
         city = sp.getString("city", "");
         id = sp.getString("id", "");
@@ -202,7 +240,7 @@ public class MainActivity extends FragmentActivity {
             getWeather(id, GetWeatherThread.SEARCH_BY_ID);
 
 
-        }
+        }*/
 
     }
 
@@ -255,5 +293,38 @@ public class MainActivity extends FragmentActivity {
 
         }*/
 
+    }
+    private class CityListAdapter extends ArrayAdapter<String>
+    {
+        private int layoutResourceId;
+        public CityListAdapter(Context context, int resource, List<String> objects) {
+            super(context, resource, objects);
+            layoutResourceId=resource;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            final String content=getItem(position);
+            LinearLayout linearLayout=new LinearLayout(getContext());
+            LayoutInflater inflater= (LayoutInflater) getContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+            inflater.inflate(layoutResourceId, linearLayout, true);
+
+            TextView tvCityName= (TextView) linearLayout.findViewById(R.id.drawer_city_list_text);
+            tvCityName.setText(content);
+
+            ImageButton button= (ImageButton) linearLayout.findViewById(R.id.drawer_city_list_delete);
+            button.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.i("output","delete button clicked:"+content);
+                    fragList.remove(position);
+                    cityNameList.remove(position);
+                    fragmentAdapter.notifyDataSetChanged();
+                    listViewAdapter.notifyDataSetChanged();
+                    DataStore.deleteCity(getContext(),cities[position]);
+                }
+            });
+            return linearLayout;
+        }
     }
 }

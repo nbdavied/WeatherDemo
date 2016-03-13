@@ -1,12 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:descendantFocusability="blocksDescendants">
     <TextView
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"/>
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:textSize="25sp"
+        android:layout_marginLeft="15dp"
+        android:text="ningbo"
+        android:id="@+id/drawer_city_list_text"/>
     <ImageButton
-        android:layout_width="20dp"
-        android:layout_height="20dp" />
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginRight="5dp"
+        android:src="@drawable/del_city"
+        android:id="@+id/drawer_city_list_delete"
+        android:background="@android:color/transparent"
+        android:focusable="false"/>
 </LinearLayout>

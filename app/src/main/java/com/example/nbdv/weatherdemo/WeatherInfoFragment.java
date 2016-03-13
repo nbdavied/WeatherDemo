@@ -61,6 +61,7 @@ public class WeatherInfoFragment extends Fragment {
     }
 
     private void updateContent(){
+        tvCity.setText(CityName);
         int curTmp=weather.serviceVersion[0].now.tmp;
         tvTemp.setText(curTmp + "℃");
     }
