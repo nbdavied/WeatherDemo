@@ -84,7 +84,7 @@ public class SettingActivity extends AppCompatActivity {
                     //                                          int[] grantResults)
                     // to handle the case where the user grants the permission. See the documentation
                     // for ActivityCompat#requestPermissions for more details.
-                    ActivityCompat.requestPermissions(SettingActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},0);
+                    //ActivityCompat.requestPermissions(SettingActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},0);
                     return;
                 }
                 /*locationManager.requestLocationUpdates(LocationManager.NETWORK_PRO`VIDER, 0, 0, locationListener);*/
@@ -172,12 +172,7 @@ public class SettingActivity extends AppCompatActivity {
         public void onClick(View v) {
             cityName = etCity.getText().toString();
             if (etCity.getText().toString().equals(chosenCity.getCityName())) {
-                //输入的城市名称、id保存到本地
-                SharedPreferences sp = context.getSharedPreferences("Preference", MODE_PRIVATE);
-                SharedPreferences.Editor editor = sp.edit();
-                editor.putString("id", chosenCity.getCityId());
-                editor.putString("city", chosenCity.getCityName());
-                editor.commit();
+
                 //将输入的城市名称回传给mainactivity
                 Intent data = new Intent();
                 data.putExtra("id", chosenCity.getCityId());
