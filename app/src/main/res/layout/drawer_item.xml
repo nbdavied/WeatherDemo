@@ -14,10 +14,10 @@
         android:text="ningbo"
         android:id="@+id/drawer_city_list_text"/>
     <ImageButton
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:layout_gravity="center_vertical"
-        android:layout_marginRight="5dp"
+        android:layout_marginRight="10dp"
         android:src="@drawable/del_city"
         android:id="@+id/drawer_city_list_delete"
         android:background="@android:color/transparent"

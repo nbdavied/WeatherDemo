@@ -74,13 +74,7 @@ public class MainActivity extends FragmentActivity {
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            /*super.handleMessage(msg);
-            Gson gson = new Gson();
-            weather = gson.fromJson(msg.getData().getString("weatherString"), JsonWeather.class);
-            if (weather != null)
-                updateContent();
-            //progressBar.setVisibility(ProgressBar.INVISIBLE);
-            swipeLayout.setRefreshing(false);*/
+
             switch (msg.what) {
                 case HANDLER_MESSAGE_FRAGMENT_REFRESH_FINISHED:
                     //fragment刷新完毕
@@ -106,17 +100,6 @@ public class MainActivity extends FragmentActivity {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         btAddCity = (Button) findViewById(R.id.btAddCity);
         //findViewById end here----------------------------------------------
-
-        /*tvCity = (TextView) findViewById(R.id.tvCity);
-
-        tvTemp = (TextView) findViewById(R.id.tvTemp);
-        tvTempRange = (TextView) findViewById(R.id.tvTempRange);
-        tvAirQua = (TextView) findViewById(R.id.tvAirQua);
-        tvPM25 = (TextView) findViewById(R.id.tvPM25);
-        ivCond= (ImageView) findViewById(R.id.ivCond);
-        progressBar=(ProgressBar) findViewById(R.id.progressBar);
-        lineChart= (LineChart) findViewById(R.id.lineChart);
-        fragmentContainer= (FrameLayout) findViewById(R.id.fragment_container);*/
 
         //实例jsonWeather
         weather = new JsonWeather();
@@ -239,34 +222,7 @@ public class MainActivity extends FragmentActivity {
     private void Refresh() {
         //刷新当前fragment数据
         fragList.get(viewPager.getCurrentItem()).refreshData(handler);
-
-        //遍历fraglist全部刷新
-        /*for (WeatherInfoFragment fragment : fragList) {
-            fragment.refreshData();
-        }*/
-        /*//查看本地是否存储城市名称或id，如有则直接载入
-        SharedPreferences sp = MainActivity.this.getSharedPreferences("Preference", MODE_PRIVATE);
-        city = sp.getString("city", "");
-        id = sp.getString("id", "");
-        if (id == "" && city == "") {
-            //id和市名都未设置，则直接转向设置界面
-            //tvCity.setText("City not set.");
-            Intent intent = new Intent(MainActivity.this, SettingActivity.class);
-            startActivityForResult(intent, 1);
-        } else if (id == "") {
-            //id未设置，则根据市名查询天气
-            // tvCity.setText(city);
-            //开启线程获取天气数据
-            getWeather(city, GetWeatherThread.SEARCH_BY_CITY);
-
-        } else {
-            //已存储id和city
-            //tvCity.setText(city);
-            getWeather(id, GetWeatherThread.SEARCH_BY_ID);
-
-
-        }*/
-
+        
     }
 
     private void getWeather(String searchString, int searchMode) {

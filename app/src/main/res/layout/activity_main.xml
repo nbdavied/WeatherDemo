@@ -154,22 +154,26 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:orientation="vertical"
-        android:background="#aaaaaa">
+        android:background="#000000">
 
         <ListView
             android:id="@+id/drawer_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#9999cc"
-            android:divider="@android:color/transparent" />
+            android:background="#080946"
+            android:divider="#ffffff"
+            android:dividerHeight="2dp"
+            />
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp">
+            android:layout_height="50dp"
+            android:layout_marginTop="50dp">
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 android:textSize="25sp"
+                android:textColor="@color/white"
                 android:paddingLeft="15dp"
                 android:id="@+id/btAddCity"
                 android:background="@android:color/transparent"

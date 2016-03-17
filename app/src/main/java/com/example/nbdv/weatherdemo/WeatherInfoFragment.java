@@ -26,13 +26,17 @@ import com.google.gson.Gson;
 
 
 public class WeatherInfoFragment extends Fragment {
-    private TextView tvCity;
-    private TextView tvTemp;
-    private TextView tvTempRange;
-    private TextView tvAirQua;
-    private TextView tvPM25;
-    private ImageView ivCond;
+    //view类
+    private ImageView ivNowInfoCondition;
+    private TextView tvNowInfoCondition;
+    private TextView tvMaxTemp;
+    private TextView tvMinTemp;
+    private TextView tvCurrentTemp;
+    private TextView tvCityName;
+    private ScrollView scrollView;
+    private LinearLayout mainWeatherInfoLayout;
     private LineChart lineChart;
+    private View view;             //根视图
     private String CityName;    //选定的城市名称
     private String CityID;      //城市id
     private JsonWeather weather;
@@ -40,28 +44,39 @@ public class WeatherInfoFragment extends Fragment {
     private boolean returnHandlerToParent = false;    //如果为true，则需要向parent activity传递handler，告知数据已经刷新
     private Handler parentHandler;
     private SwipeRefreshLayout swipeRefreshLayout;  //传入parent activity下拉刷新控件
-    private ScrollView scrollView;
-    private boolean needDisableScrollView;
-    private LinearLayout mainWeatherInfoLayout;
-    private  View view;
+
+    private boolean needDisableScrollView;      //true则需要将scroll view屏蔽
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_weather_info, container, false);
-        tvCity = (TextView) view.findViewById(R.id.tvCity);
-        tvTemp = (TextView) view.findViewById(R.id.tvTemp);
+
+        /*--------------------find view here-----------------*/
+        ivNowInfoCondition= (ImageView) view.findViewById(R.id.iv_now_info_condition);
+         tvNowInfoCondition= (TextView) view.findViewById(R.id.tv_now_info_condition);
+         tvMaxTemp= (TextView) view.findViewById(R.id.tv_max_temp);
+         tvMinTemp= (TextView) view.findViewById(R.id.tv_min_temp);
+         tvCurrentTemp= (TextView) view.findViewById(R.id.tv_current_temp);
+        tvCityName= (TextView) view.findViewById(R.id.tv_city_name);
         lineChart = (LineChart) view.findViewById(R.id.lineChart);
         scrollView = (ScrollView) view.findViewById(R.id.weather_fragment_scroll_view);
+        mainWeatherInfoLayout= (LinearLayout) view.findViewById(R.id.main_weather_info);
+        /*-------------------find view finished--------------*/
+
         viewCreated = true;
         Log.i("info", "fragment onCreateView");
-        //LinearLayout blankLayout= (LinearLayout) view.findViewById(R.id.blank_layout);
-        mainWeatherInfoLayout= (LinearLayout) view.findViewById(R.id.main_weather_info);
+
+
         ViewTreeObserver vto=mainWeatherInfoLayout.getViewTreeObserver();
+        //等待视图加载完成之后，读取linear layout高度并设置margin值
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
             @Override
             public void onGlobalLayout() {
                 int h=mainWeatherInfoLayout.getHeight();
-                int padding=getResources().getDisplayMetrics().heightPixels-h;
+                int h2=tvCityName.getHeight();
+                int padding=getResources().getDisplayMetrics().heightPixels-h-h2;
                 //mainWeatherInfoLayout.setPadding(0, padding, 0, 0);
 
                 LinearLayout.LayoutParams lp= (LinearLayout.LayoutParams) mainWeatherInfoLayout.getLayoutParams();
@@ -105,9 +120,21 @@ public class WeatherInfoFragment extends Fragment {
     }
 
     private void updateContent() {
-        tvCity.setText(CityName);
-        int curTmp = weather.serviceVersion[0].now.tmp;
-        tvTemp.setText(curTmp + "℃");
+        JsonWeather.Now now=weather.serviceVersion[0].now;
+        //设置图标
+        int curCond=now.cond.code;
+        ivNowInfoCondition.setImageResource(JsonWeather.getConditionImage(curCond));
+        //设置天气状态
+        String cond=now.cond.txt;
+        tvNowInfoCondition.setText(cond);
+        //设置最高气温
+        tvMaxTemp.setText(weather.serviceVersion[0].daily_forecast[0].tmp.max+"°");
+        //设置最低气温
+        tvMaxTemp.setText(weather.serviceVersion[0].daily_forecast[0].tmp.min+"°");
+        //设置当前温度
+        tvCurrentTemp.setText(now.tmp+"°");
+        //设置城市名称
+        tvCityName.setText(CityName);
 
         //设置LineChart属性
         int lenth = weather.serviceVersion[0].daily_forecast.length;
@@ -170,15 +197,6 @@ public class WeatherInfoFragment extends Fragment {
             DisableSwipeRefreshLayoutWhileScrolling();
         if (weather != null)
             updateContent();
-
-
-        //LinearLayout.LayoutParams params= (LinearLayout.LayoutParams) mainWeatherInfoLayout.getLayoutParams();
-        //int scrollViewHeight=scrollView.getHeight();
-        //int layoutHeight=params.height;
-        //int height=getResources().getDisplayMetrics().heightPixels-mainWeatherInfoLayout.getMeasuredHeight();
-        //params.setMargins(0,scrollViewHeight-layoutHeight,0,0);
-        //mainWeatherInfoLayout.setLayoutParams(params);
-        //mainWeatherInfoLayout.setPadding(0,height,0,0);
 
     }
 

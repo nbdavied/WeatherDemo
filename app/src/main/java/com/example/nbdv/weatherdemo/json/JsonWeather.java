@@ -3,7 +3,6 @@ package com.example.nbdv.weatherdemo.json;
 import com.example.nbdv.weatherdemo.R;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.Date;
 
 /**
  * Created by nbdav on 2016/1/25.
@@ -12,7 +11,7 @@ public class JsonWeather {
     @SerializedName("HeWeather data service 3.0")
     public WeatherInfo[] serviceVersion;
 
-    public class WeatherInfo{
+    public class WeatherInfo {
         public AirQuality aqi;
         public Basic basic;
         public DailyForecast[] daily_forecast;
@@ -21,10 +20,11 @@ public class JsonWeather {
         public String status;
         public Suggestion suggestion;
     }
-    public class AirQuality
-    {
+
+    public class AirQuality {
         public City city;
-        public class City{
+
+        public class City {
             public int aqi;
             public int co;
             public int no2;
@@ -35,22 +35,22 @@ public class JsonWeather {
             public int so2;
         }
     }
-    public class Basic
-    {
+
+    public class Basic {
         public String city;
-        public  String cnty;
+        public String cnty;
         public String id;
         public String lat;
         public String lon;
-        public  Update update;
-        public class Update
-        {
-            public  String loc;
+        public Update update;
+
+        public class Update {
+            public String loc;
             public String utc;
         }
     }
-    public class DailyForecast
-    {
+
+    public class DailyForecast {
         public Astro astro;
         public Cond cond;
         public String date;
@@ -61,73 +61,71 @@ public class JsonWeather {
         public Tmp tmp;
         public int vis;
         public Wind wind;
-        public class Astro
-        {
+
+        public class Astro {
             public String sr;
-            public  String ss;
+            public String ss;
         }
-        public class Cond
-        {
+
+        public class Cond {
             public int code_d;
             public int code_n;
             public String txt_d;
             public String txt_n;
         }
-        public class Tmp
-        {
+
+        public class Tmp {
             public int max;
             public int min;
         }
 
     }
-    public class Wind
-    {
+
+    public class Wind {
         public String deg;
-        public  String dir;
+        public String dir;
         public String sc;
         public int spd;
     }
 
-    public class HourlyForecast
-    {
+    public class HourlyForecast {
         public String date;
         public int hum;
         public int pop;
         public int pres;
         public int tmp;
-        public  Wind wind;
+        public Wind wind;
 
     }
-    public class Now
-    {
-        public  Cond cond;
+
+    public class Now {
+        public Cond cond;
         public int fl;
         public int hum;
         public String pcpn;
         public int pres;
         public int tmp;
-        public  int vis;
+        public int vis;
         public Wind wind;
-        public class Cond
-        {
+
+        public class Cond {
             public int code;
             public String txt;
         }
     }
 
-    public class Suggestion
-    {
+    public class Suggestion {
         public Description comf;
         public Description cw;
         public Description drsg;
         public Description flu;
         public Description sport;
-        public  Description trav;
+        public Description trav;
         public Description uv;
-        class Description
-        {
-            public  String brf;
-            public  String txt;
+
+        class Description {
+            public String brf;
+            public String txt;
         }
     }
 
