@@ -3,7 +3,7 @@
     <string name="action_settings">Settings</string>
     <string name="City">City:</string>
     <string name="Province">Province:</string>
-    <string name="version">Version:0.2.0</string>
+    <string name="version">Version:0.3.0</string>
     <string name="InputHint">请在列表中选择要查询的城市，或者直接输入拼音：</string>
     <string name="inputCityName">input the city name</string>
     <string name="confirm">确定</string>
@@ -23,4 +23,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_city">Add City</string>
+    <string name="up_arrow">↑</string>
+    <string name="down_arrow">↓</string>
 </resources>

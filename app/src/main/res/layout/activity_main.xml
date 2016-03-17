@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.example.nbdv.weatherdemo.View.VerticalSwipeRefreshLayout
+        <android.support.v4.widget.SwipeRefreshLayout
             android:id="@+id/swipeLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -140,21 +140,48 @@
             </LinearLayout>
             -->
 
-        </com.example.nbdv.weatherdemo.View.VerticalSwipeRefreshLayout>
+        </android.support.v4.widget.SwipeRefreshLayout>
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fabSetting"
-            android:layout_width="wrap_content"
+
+
+
+
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:orientation="vertical"
+        android:background="#aaaaaa">
+
+        <ListView
+            android:id="@+id/drawer_list"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_margin="20dp"
-            android:elevation="@dimen/fab_elevation"
-            app:backgroundTint="#2398d7" />
-        <!--android:src="@drawable/ic_setting"-->
+            android:background="#9999cc"
+            android:divider="@android:color/transparent" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:textSize="25sp"
+                android:paddingLeft="15dp"
+                android:id="@+id/btAddCity"
+                android:background="@android:color/transparent"
 
-
-        <TextView
+                android:text="@string/add_city"
+                android:clickable="false"
+                android:shadowColor="@android:color/transparent" />
+        </LinearLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -164,30 +191,8 @@
             android:layout_centerHorizontal="true"
             android:layout_gravity="center_horizontal"
             android:text="@string/version" />
+        </RelativeLayout>
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:visibility="invisible" />
-
-
-    </RelativeLayout>
-
-    <LinearLayout
-        android:layout_width="240dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:background="#aaaaaa">
-
-        <ListView
-            android:id="@+id/drawer_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#9999cc"
-            android:divider="@android:color/transparent" />
     </LinearLayout>
 
 </android.support.v4.widget.DrawerLayout>

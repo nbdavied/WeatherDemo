@@ -17,6 +17,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -44,19 +45,21 @@ import java.util.List;
 
 
 public class MainActivity extends FragmentActivity {
+    public final static int HANDLER_MESSAGE_FRAGMENT_REFRESH_FINISHED = 1;
     //定义控件
 
     private FloatingActionButton fabSetting;
     private DrawerLayout drawerLayout;
+    private Button btAddCity;
     /*private TextView tvCity;
     private TextView tvTemp;
     private TextView tvTempRange;
     private TextView tvAirQua;
     private TextView tvPM25;
     private ImageView ivCond;*/
-    private ProgressBar progressBar;
+    //private ProgressBar progressBar;
     //private LineChart lineChart;
-    private VerticalSwipeRefreshLayout swipeLayout;
+    private SwipeRefreshLayout swipeLayout;
     //private FrameLayout fragmentContainer;
     private ViewPager viewPager;
     private List<WeatherInfoFragment> fragList;
@@ -71,13 +74,21 @@ public class MainActivity extends FragmentActivity {
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            super.handleMessage(msg);
+            /*super.handleMessage(msg);
             Gson gson = new Gson();
             weather = gson.fromJson(msg.getData().getString("weatherString"), JsonWeather.class);
             if (weather != null)
                 updateContent();
-            progressBar.setVisibility(ProgressBar.INVISIBLE);
-            swipeLayout.setRefreshing(false);
+            //progressBar.setVisibility(ProgressBar.INVISIBLE);
+            swipeLayout.setRefreshing(false);*/
+            switch (msg.what) {
+                case HANDLER_MESSAGE_FRAGMENT_REFRESH_FINISHED:
+                    //fragment刷新完毕
+                    swipeLayout.setRefreshing(false);
+                    break;
+                default:
+                    break;
+            }
         }
     };
 
@@ -88,11 +99,12 @@ public class MainActivity extends FragmentActivity {
         setContentView(R.layout.activity_main);
 
         //findViewById-------------------------------------------------------
-        fabSetting = (FloatingActionButton) findViewById(R.id.fabSetting);
-        swipeLayout = (VerticalSwipeRefreshLayout) findViewById(R.id.swipeLayout);
+
+        swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipeLayout);
         viewPager = (ViewPager) findViewById(R.id.view_pager);
-        drawerListView= (ListView) findViewById(R.id.drawer_list);
-        drawerLayout= (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerListView = (ListView) findViewById(R.id.drawer_list);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        btAddCity = (Button) findViewById(R.id.btAddCity);
         //findViewById end here----------------------------------------------
 
         /*tvCity = (TextView) findViewById(R.id.tvCity);
@@ -119,7 +131,7 @@ public class MainActivity extends FragmentActivity {
             DataStore.initDatabase(this);
         }
         fragList = new ArrayList<WeatherInfoFragment>();
-        cityNameList=new ArrayList<String>();
+        cityNameList = new ArrayList<String>();
         cities = DataStore.getStoredCities(this);
         //如果未设置城市，直接切换到设置页面
         if (cities.length == 0) {
@@ -131,6 +143,7 @@ public class MainActivity extends FragmentActivity {
                 WeatherInfoFragment fragment = new WeatherInfoFragment();
                 fragList.add(fragment);
                 fragment.setFragmentCity(cities[i].getCityId(), cities[i].getCityName());
+                fragment.DisableSwipe(swipeLayout);
                 cityNameList.add(cities[i].getCityName());
             }
         }
@@ -138,18 +151,27 @@ public class MainActivity extends FragmentActivity {
         fragmentAdapter = new WeatherInfoFragmentAdapter(getSupportFragmentManager(), fragList);
         viewPager.setAdapter(fragmentAdapter);
         //绑定drawer listview 和adapter
-        listViewAdapter=new CityListAdapter(this,R.layout.drawer_item,cityNameList);
+        listViewAdapter = new CityListAdapter(this, R.layout.drawer_item, cityNameList);
         drawerListView.setAdapter(listViewAdapter);
 
-        //点击设置按钮跳转
-
-        fabSetting.setOnClickListener(new OnClickListener() {
+        //当viewpager滑动时让SwipeRefreshLayout不可用，避免滑动冲突
+        viewPager.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, SettingActivity.class);
-                startActivityForResult(intent, 1);
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_MOVE:
+                        swipeLayout.setEnabled(false);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        swipeLayout.setEnabled(true);
+                        break;
+                }
+                return false;
             }
         });
+        //点击设置按钮跳转
+
 
         //下拉刷新
         swipeLayout.setOnRefreshListener(new VerticalSwipeRefreshLayout.OnRefreshListener() {
@@ -171,10 +193,17 @@ public class MainActivity extends FragmentActivity {
         drawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.i("output","list item clicked:"+cityNameList.get(position));
+                Log.i("output", "list item clicked:" + cityNameList.get(position));
                 drawerLayout.closeDrawers();
-                viewPager.setCurrentItem(position,true);
+                viewPager.setCurrentItem(position, true);
 
+            }
+        });
+        btAddCity.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, SettingActivity.class);
+                startActivityForResult(intent, 1);
             }
         });
     }
@@ -191,6 +220,7 @@ public class MainActivity extends FragmentActivity {
             id = data.getStringExtra("id");
             DataStore.addCity(this, city, id);
             WeatherInfoFragment fragment = new WeatherInfoFragment();
+            fragment.DisableSwipe(swipeLayout);
             fragList.add(fragment);
             fragment.setFragmentCity(id, city);
             fragmentAdapter.notifyDataSetChanged();
@@ -204,21 +234,16 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    /*
-    * 初始化程序
-    * */
-    private void init() {
 
-
-        //Refresh();
-
-    }
 
     private void Refresh() {
-        //遍历fragment，刷新fragment数据
-        for(WeatherInfoFragment fragment:fragList){
+        //刷新当前fragment数据
+        fragList.get(viewPager.getCurrentItem()).refreshData(handler);
+
+        //遍历fraglist全部刷新
+        /*for (WeatherInfoFragment fragment : fragList) {
             fragment.refreshData();
-        }
+        }*/
         /*//查看本地是否存储城市名称或id，如有则直接载入
         SharedPreferences sp = MainActivity.this.getSharedPreferences("Preference", MODE_PRIVATE);
         city = sp.getString("city", "");
@@ -245,7 +270,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void getWeather(String searchString, int searchMode) {
-        progressBar.setVisibility(ProgressBar.VISIBLE);
+        //progressBar.setVisibility(ProgressBar.VISIBLE);
         GetWeatherThread thread = new GetWeatherThread(searchString, handler, searchMode);
         thread.start();
     }
@@ -294,34 +319,36 @@ public class MainActivity extends FragmentActivity {
         }*/
 
     }
-    private class CityListAdapter extends ArrayAdapter<String>
-    {
+
+    //重新抽屉中listview adapter,使之能够响应按钮点击
+    private class CityListAdapter extends ArrayAdapter<String> {
         private int layoutResourceId;
+
         public CityListAdapter(Context context, int resource, List<String> objects) {
             super(context, resource, objects);
-            layoutResourceId=resource;
+            layoutResourceId = resource;
         }
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-            final String content=getItem(position);
-            LinearLayout linearLayout=new LinearLayout(getContext());
-            LayoutInflater inflater= (LayoutInflater) getContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+            final String content = getItem(position);
+            LinearLayout linearLayout = new LinearLayout(getContext());
+            LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(LAYOUT_INFLATER_SERVICE);
             inflater.inflate(layoutResourceId, linearLayout, true);
 
-            TextView tvCityName= (TextView) linearLayout.findViewById(R.id.drawer_city_list_text);
+            TextView tvCityName = (TextView) linearLayout.findViewById(R.id.drawer_city_list_text);
             tvCityName.setText(content);
 
-            ImageButton button= (ImageButton) linearLayout.findViewById(R.id.drawer_city_list_delete);
+            ImageButton button = (ImageButton) linearLayout.findViewById(R.id.drawer_city_list_delete);
             button.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.i("output","delete button clicked:"+content);
+                    Log.i("output", "delete button clicked:" + content);
                     fragList.remove(position);
                     cityNameList.remove(position);
                     fragmentAdapter.notifyDataSetChanged();
                     listViewAdapter.notifyDataSetChanged();
-                    DataStore.deleteCity(getContext(),cities[position]);
+                    DataStore.deleteCity(getContext(), cities[position]);
                 }
             });
             return linearLayout;
