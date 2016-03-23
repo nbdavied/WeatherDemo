@@ -2,6 +2,7 @@ package com.example.nbdv.weatherdemo;
 
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,48 +13,30 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.example.nbdv.weatherdemo.Service.WidgetUpdateService;
+import com.example.nbdv.weatherdemo.Utils.DataStore;
 
 /**
  * Created by nbdav on 2016/2/29.
  */
 public class WeatherWidgetProvider extends AppWidgetProvider {
-    SharedPreferences sp;
-    int[] widgetIds;
     Context context;
-    AppWidgetManager appWidgetManager;
-/*    Handler handler=new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            RemoteViews rviews=new RemoteViews(context.getPackageName(),R.layout.widget_layout);
-            //rviews.setTextViewText(R.id.tvCity,cityName);
-            for(int i=0;i<widgetIds.length;i++)
-            appWidgetManager.updateAppWidget(widgetIds[i], rviews);
-        }
-    };*/
+
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        Intent intent=new Intent(context, WidgetUpdateService.class);
-        context.startService(intent);
-/*        sp=context.getSharedPreferences("Preference",Context.MODE_PRIVATE);
-        this.appWidgetManager=appWidgetManager;
-        String cityName=sp.getString("city","");
-        String cityId=sp.getString("id","");
-        widgetIds=appWidgetIds;
-        for(int i=0;i<appWidgetIds.length;i++)
-        {
-            RemoteViews remoteViews=new RemoteViews(context.getPackageName(),R.layout.widget_layout);
-            remoteViews.setTextViewText(R.id.tvCity,cityName);
-            appWidgetManager.updateAppWidget(appWidgetIds[i], remoteViews);
-            Log.i("widget",cityName+" ");
-        }
 
-        Thread newthread=new Thread(new Runnable() {
-            @Override
-            public void run() {
-                handler.sendEmptyMessage(0);
-            }
-        });
-        newthread.start();*/
+
+        for (int appWidgetId:appWidgetIds) {
+            String cityId= DataStore.getWidgetConf(context,appWidgetId);
+            if(cityId!=null)
+                updateAppWidget(context,appWidgetManager,appWidgetId,cityId);
+        }
+    }
+
+    public static void updateAppWidget(Context context,AppWidgetManager appWidgetManager,int appWidgetId,String CityId){
+        Intent intent=new Intent(context, WidgetUpdateService.class);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,appWidgetId);
+        intent.putExtra("CITY_ID",CityId);
+        context.startService(intent);
     }
 
     @Override
@@ -64,5 +47,14 @@ public class WeatherWidgetProvider extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
+    }
+
+    @Override
+    public void onDisabled(Context context) {
+        super.onDisabled(context);
+        AppWidgetManager appWidgetManager=AppWidgetManager.getInstance(context);
+        for (int appWidgetId:appWidgetManager.getAppWidgetIds(new ComponentName(context, WeatherWidgetProvider.class))) {
+            DataStore.deleteWidgetConf(context,appWidgetId);
+        }
     }
 }

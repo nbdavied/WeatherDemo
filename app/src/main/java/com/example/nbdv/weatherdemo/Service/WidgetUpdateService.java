@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -27,6 +28,7 @@ public class WidgetUpdateService extends Service {
     private String CityId;
     private JsonWeather weather;
     private AppWidgetManager manager;
+    private int appWidgetId;
     private int[] tvWidgetDay = new int[]{
             R.id.tvWidgetDay1, R.id.tvWidgetDay2, R.id.tvWidgetDay3, R.id.tvWidgetDay4, R.id.tvWidgetDay5
     };
@@ -46,34 +48,23 @@ public class WidgetUpdateService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         manager = AppWidgetManager.getInstance(this);
-        //查看本地是否存储城市名称或id，如有则直接载入
-        SharedPreferences sharedPreferences = this.getSharedPreferences("Preference", MODE_PRIVATE);
-        CityName = sharedPreferences.getString("city", "");
-        CityId = sharedPreferences.getString("id", "");
-        if (CityId == "" && CityName == "") {
-            //id和市名都未设置，则显示未设置状态
-            setNull();
-        } else if (CityId == "") {
-            //id未设置，则根据市名查询天气
-            //开启线程获取天气数据
-            getWeather(CityName, GetWeatherThread.SEARCH_BY_CITY);
-
-        } else {
-            //已存储id和city
-
-            getWeather(CityId, GetWeatherThread.SEARCH_BY_ID);
+        Bundle extra=intent.getExtras();
+        appWidgetId=extra.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
+        if(appWidgetId==-1)
+        {
+            stopSelf();
+            return START_NOT_STICKY;
         }
+        CityId=extra.getString("CITY_ID");
+
+        GetWeatherThread thread=new GetWeatherThread(CityId,handler,GetWeatherThread.SEARCH_BY_ID);
+        thread.start();
         return START_NOT_STICKY;
     }
 
-    private void setNull() {
 
-    }
 
-    private void getWeather(String searchString, int searchMode) {
-        GetWeatherThread thread = new GetWeatherThread(searchString, handler, searchMode);
-        thread.start();
-    }
+
 
     Handler handler = new Handler() {
         @Override
@@ -119,7 +110,7 @@ public class WidgetUpdateService extends Service {
 
         }
 
-        manager.updateAppWidget(manager.getAppWidgetIds(new ComponentName(this, WeatherWidgetProvider.class)), rViews);
+        manager.updateAppWidget(appWidgetId, rViews);
     }
 
 

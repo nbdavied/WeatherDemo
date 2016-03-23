@@ -130,21 +130,21 @@ public class WeatherInfoFragment extends Fragment {
         //设置最高气温
         tvMaxTemp.setText(weather.serviceVersion[0].daily_forecast[0].tmp.max+"°");
         //设置最低气温
-        tvMaxTemp.setText(weather.serviceVersion[0].daily_forecast[0].tmp.min+"°");
+        tvMinTemp.setText(weather.serviceVersion[0].daily_forecast[0].tmp.min+"°");
         //设置当前温度
         tvCurrentTemp.setText(now.tmp+"°");
         //设置城市名称
         tvCityName.setText(CityName);
 
         //设置LineChart属性
-        int lenth = weather.serviceVersion[0].daily_forecast.length;
-        int lowTemp[] = new int[lenth];
-        int highTemp[] = new int[lenth];
-        for (int i = 0; i < lenth; i++) {
-            lowTemp[i] = weather.serviceVersion[0].daily_forecast[i].tmp.min;
-            highTemp[i] = weather.serviceVersion[0].daily_forecast[i].tmp.max;
-        }
-        lineChart.setTemperature(lowTemp, highTemp);
+//        int lenth = weather.serviceVersion[0].daily_forecast.length;
+//        int lowTemp[] = new int[lenth];
+//        int highTemp[] = new int[lenth];
+//        for (int i = 0; i < lenth; i++) {
+//            lowTemp[i] = weather.serviceVersion[0].daily_forecast[i].tmp.min;
+//            highTemp[i] = weather.serviceVersion[0].daily_forecast[i].tmp.max;
+//        }
+        lineChart.setData(weather);
 
     }
 
